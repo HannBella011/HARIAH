@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=Great+Vibes&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+:root {
+  --title-font: 'Great Vibes', cursive;
+  --subtitle-font: 'Caveat', cursive;
+  --button-font: 'Playfair Display', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--subtitle-font);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Hide all iframes globally */
+iframe {
+  display: none !important;
+}
+
+/* DomeGallery scroll lock */
+.dg-scroll-lock {
+  overflow: hidden !important;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+.aria-status {
+  animation: aria-status-fade 2.4s ease both;
+}
+
+@keyframes aria-status-fade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(-8px);
+  }
+  15%,
+  78% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(-8px);
+  }
+}
