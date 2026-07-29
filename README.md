@@ -67,6 +67,29 @@ The built files will be in the `dist` directory.
 
 ## Deployment
 
+### GitHub Pages (Recommended)
+
+This project is configured for automatic deployment to GitHub Pages using GitHub Actions:
+
+1. **Automatic Deployment**: Simply push changes to the `main` branch
+2. **GitHub Actions** will automatically build and deploy to GitHub Pages
+3. Your site will be available at: `https://hannbella011.github.io/HARIAH/`
+
+**Manual Deployment Script**:
+```powershell
+./deploy.ps1
+```
+
+This script will:
+- Build the project
+- Commit and push changes to main
+- Trigger GitHub Actions deployment
+
+**GitHub Pages Configuration**:
+- Source: `gh-pages` branch (automatically managed by GitHub Actions)
+- Base path: `/HARIAH/` (configured in `vite.config.js`)
+- Build output: `dist/` directory
+
 ### Vercel
 
 1. Push your code to GitHub
