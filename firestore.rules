@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // HARIAH is a public, no-sign-in sharing app. These rules allow the
+    // browser client to show, send, and manage Arias without authentication.
+    match /arias/{ariaId} {
+      allow read: if true;
+      allow create: if request.resource.data.recipient is string
+        && request.resource.data.message is string
+        && request.resource.data.songLink is string
+        && request.resource.data.senderCode is string;
+      allow delete: if true;
+    }
+
+    // Codes are four-digit, public browser identifiers rather than accounts.
+    match /userCodes/{code} {
+      allow get: if true;
+      allow create, update: if code.matches('^[0-9]{4}$')
+        && request.resource.data.code == code;
+    }
+  }
+}

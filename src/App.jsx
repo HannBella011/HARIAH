@@ -9,7 +9,7 @@ import SendAriaModal from './components/SendAriaModal';
 import SearchAriaModal from './components/SearchAriaModal';
 import ProfileModal from './components/ProfileModal';
 import UserCodeModal from './components/UserCodeModal';
-import { subscribeToArias, checkCodeExists, registerUserCode } from './lib/ariaStorage';
+import { subscribeToArias } from './lib/ariaStorage';
 
 const normalizeAria = ariaData => ({
   ...ariaData,
@@ -145,8 +145,9 @@ function App() {
         return;
       }
 
-      // Register the code (using merge: true, so it works for both new and existing codes)
-      await registerUserCode(code);
+      // A code identifies this browser's sender profile. It does not need a
+      // Firestore write, so first-time users can continue even when the
+      // database has restrictive rules or is temporarily unavailable.
       setUserCode(code);
       localStorage.setItem('userCode', code);
       setStatusMessage(`Welcome, Code ${code}!`);

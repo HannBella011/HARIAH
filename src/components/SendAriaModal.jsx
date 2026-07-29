@@ -106,7 +106,7 @@ const SendAriaModal = ({ onSubmit, onError, onCancel, userCode }) => {
     try {
       const persistedPicture = formData.picture ? previewUrl || await readFileAsDataUrl(formData.picture) : null;
 
-      const saved = await saveAria({
+      const ariaToPersist = {
         recipient: submittedAria.recipient,
         message: submittedAria.message,
         songLink: submittedAria.songLink,
@@ -115,24 +115,25 @@ const SendAriaModal = ({ onSubmit, onError, onCancel, userCode }) => {
         senderName: 'Anonymous',
         senderCode: submittedAria.senderCode,
         createdAt: submittedAria.createdAt
-      });
+      };
 
-      // Reset form data
+      // Close and animate immediately. The network save continues in the
+      // background so a slow Firestore response can never leave this button
+      // stuck on "Sending".
       setFormData({
         recipient: '',
         message: '',
         songLink: '',
         picture: null,
-        senderCode: ''
+        senderCode: userCode || ''
       });
       setPreviewUrl('');
       setIsSubmitting(false);
+      onSubmit(submittedAria);
 
-      // Notify parent with saved record (ensure createdAt is Date)
-      onSubmit({
-        ...submittedAria,
-        id: saved.id,
-        createdAt: new Date(saved.createdAt)
+      void saveAria(ariaToPersist).catch(err => {
+        console.error('Error saving Aria:', err);
+        onError?.(err);
       });
     } catch (err) {
       console.error('Error sending Aria:', err);
