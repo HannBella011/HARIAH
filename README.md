@@ -153,6 +153,6 @@ Currently, the sender is set to "Anonymous" by default. To add a sender name fie
 - Keyboard navigation support
 - Screen reader friendly
 
-## License
+## Developer
 
-MIT License - Feel free to use this project for personal or commercial purposes.
+Hannah Bella Cambaya Atay
