@@ -23,7 +23,7 @@ const readFileAsDataUrl = file =>
     reader.readAsDataURL(file);
   });
 
-const SendAriaModal = ({ onSubmit, onError, onCancel, userCode }) => {
+const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
   const [formData, setFormData] = useState({
     recipient: '',
     message: '',
@@ -131,10 +131,7 @@ const SendAriaModal = ({ onSubmit, onError, onCancel, userCode }) => {
       setIsSubmitting(false);
       onSubmit(submittedAria);
 
-      void saveAria(ariaToPersist).catch(err => {
-        console.error('Error saving Aria:', err);
-        onError?.(err);
-      });
+      void saveAria(ariaToPersist);
     } catch (err) {
       console.error('Error sending Aria:', err);
       setIsSubmitting(false);

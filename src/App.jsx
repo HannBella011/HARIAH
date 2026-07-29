@@ -72,8 +72,7 @@ function App() {
   const handleSendAria = ariaData => {
     const aria = normalizeAria({
       ...ariaData,
-      isNew: true,
-      notice: 'Your Aria has been sent successfully.'
+      isNew: true
     });
     setSelectedAria(aria);
     setStatusMessage('');
@@ -83,10 +82,6 @@ function App() {
       setGalleryImages(prev => replaceImageAtSlot(prev, createAriaImage(aria), nextReplaceIndex));
       setNextReplaceIndex(prev => (prev + 1) % DEFAULT_IMAGES.length);
     }
-  };
-
-  const handleSendError = () => {
-    setStatusMessage('Failed to send Aria. Please try again.');
   };
 
   const handleSearchResult = ariaData => {
@@ -288,7 +283,7 @@ function App() {
       )}
 
       {showSendModal && (
-        <SendAriaModal onSubmit={handleSendAria} onError={handleSendError} onCancel={handleBackToHome} userCode={userCode} />
+        <SendAriaModal onSubmit={handleSendAria} onCancel={handleBackToHome} userCode={userCode} />
       )}
 
       {showSearchModal && <SearchAriaModal onResultFound={handleSearchResult} onCancel={handleBackToHome} />}

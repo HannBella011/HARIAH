@@ -4,18 +4,20 @@
  */
 
 import { useState } from 'react';
-import { findAriaByRecipient } from '../lib/ariaStorage';
+import { findAriasByRecipient } from '../lib/ariaStorage';
 
 const SearchAriaModal = ({ onResultFound, onCancel }) => {
   const [searchName, setSearchName] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState('');
   const [notFound, setNotFound] = useState(false);
+  const [results, setResults] = useState([]);
 
   const handleSearch = async e => {
     e.preventDefault();
     setError('');
     setNotFound(false);
+    setResults([]);
 
     if (!searchName.trim()) {
       setError('Please enter a name to search');
@@ -26,16 +28,17 @@ const SearchAriaModal = ({ onResultFound, onCancel }) => {
     setIsSearching(true);
 
     try {
-      const found = await findAriaByRecipient(searchName.trim());
-      if (!found) {
+      const found = await findAriasByRecipient(searchName.trim());
+      if (found.length === 0) {
         setNotFound(true);
         return;
       }
 
-      onResultFound({
-        ...found,
-        createdAt: new Date(found.createdAt)
-      });
+      if (found.length === 1) {
+        onResultFound(found[0]);
+        return;
+      }
+      setResults(found);
     } catch (err) {
       console.error('Error searching for Aria:', err);
       setError('Failed to search Aria. Please try again.');
@@ -75,6 +78,23 @@ const SearchAriaModal = ({ onResultFound, onCancel }) => {
         {notFound && (
           <div className="mb-4 p-4 bg-black border border-black rounded-lg text-white text-center">
             No Aria found for this name.
+          </div>
+        )}
+
+        {results.length > 1 && (
+          <div className="mb-4 space-y-2">
+            <p className="text-center text-sm text-gray-600">Choose the Aria you want to open:</p>
+            {results.map((aria, index) => (
+              <button
+                key={aria.id}
+                type="button"
+                onClick={() => onResultFound(aria)}
+                className="w-full rounded-lg border border-gray-300 p-3 text-left hover:border-black hover:bg-gray-50 transition-colors"
+              >
+                <span className="block font-semibold text-black">Aria {index + 1}</span>
+                <span className="block truncate text-sm text-gray-600">{aria.message}</span>
+              </button>
+            ))}
           </div>
         )}
 

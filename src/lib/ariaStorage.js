@@ -1,92 +1,146 @@
-// Firebase-backed storage for Aria messages
+// Firebase-backed storage with a local copy so sent Arias survive refreshes
+// while Firestore is unavailable or still synchronising.
 import { db, collection, addDoc, query, where, getDocs, onSnapshot, serverTimestamp, orderBy, limit, deleteDoc, doc, setDoc, getDoc } from '../firebase';
 
 const ARIA_COLLECTION = 'arias';
 const USER_CODES_COLLECTION = 'userCodes';
+const LOCAL_ARIA_KEY = 'hariah:arias';
 
-export const saveAria = async (aria) => {
+const toKey = value => (value || '').trim().toLocaleLowerCase();
+const toMillis = value => {
+  if (value?.toDate) return value.toDate().getTime();
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+};
+const sortNewestFirst = arias => [...arias].sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+const normalizeAria = aria => ({
+  ...aria,
+  songLink: aria.songLink || aria.songURL || '',
+  recipientKey: aria.recipientKey || toKey(aria.recipient),
+  senderCodeKey: aria.senderCodeKey || toKey(aria.senderCode)
+});
+
+const getLocalArias = () => {
   try {
-    const toSave = {
-      recipient: aria.recipient || '',
-      message: aria.message || '',
-      songLink: aria.songLink || aria.songURL || '',
-      songURL: aria.songLink || aria.songURL || '', // Keep both for compatibility
-      imageURL: aria.picture || aria.imageURL || null,
-      senderName: aria.senderName || 'Anonymous',
-      senderCode: aria.senderCode || aria.senderName || 'Anonymous',
-      createdAt: serverTimestamp()
-    };
-    const docRef = await addDoc(collection(db, ARIA_COLLECTION), toSave);
-    return { id: docRef.id, ...toSave };
-  } catch (error) {
-    console.error('Error saving aria to Firebase:', error);
-    throw error;
+    const saved = JSON.parse(localStorage.getItem(LOCAL_ARIA_KEY) || '[]');
+    return Array.isArray(saved) ? saved.map(normalizeAria) : [];
+  } catch {
+    return [];
   }
 };
 
-export const findAriaByRecipient = async (name) => {
-  if (!name) return null;
+const setLocalArias = arias => localStorage.setItem(LOCAL_ARIA_KEY, JSON.stringify(arias));
+
+const mergeArias = (...lists) => {
+  const byId = new Map();
+  lists.flat().forEach(aria => byId.set(aria.id, normalizeAria(aria)));
+  return sortNewestFirst([...byId.values()]);
+};
+
+const saveLocalAria = aria => {
+  const localAria = normalizeAria({
+    ...aria,
+    id: `local_${crypto.randomUUID?.() || Date.now()}`,
+    createdAt: new Date().toISOString(),
+    pending: true
+  });
+  setLocalArias(mergeArias(getLocalArias(), [localAria]));
+  return localAria;
+};
+
+const replaceLocalAria = (localId, persistedAria) => {
+  const next = getLocalArias().map(aria => aria.id === localId ? normalizeAria(persistedAria) : aria);
+  setLocalArias(mergeArias(next));
+};
+
+const removeLocalAria = ariaId => setLocalArias(getLocalArias().filter(aria => aria.id !== ariaId));
+
+const toFirebaseAria = aria => ({
+  recipient: aria.recipient || '',
+  recipientKey: toKey(aria.recipient),
+  message: aria.message || '',
+  songLink: aria.songLink || aria.songURL || '',
+  songURL: aria.songLink || aria.songURL || '',
+  imageURL: aria.picture || aria.imageURL || null,
+  senderName: aria.senderName || 'Anonymous',
+  senderCode: aria.senderCode || aria.senderName || 'Anonymous',
+  senderCodeKey: toKey(aria.senderCode || aria.senderName || 'Anonymous'),
+  createdAt: serverTimestamp()
+});
+
+export const saveAria = async aria => {
+  const localAria = saveLocalAria(aria);
+  const toSave = toFirebaseAria(aria);
+
   try {
-    const q = query(
-      collection(db, ARIA_COLLECTION),
-      where('recipient', '==', name.trim()),
-      orderBy('createdAt', 'desc'),
-      limit(1)
-    );
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) return null;
-    const doc = querySnapshot.docs[0];
-    return { 
-      id: doc.id, 
-      ...doc.data(),
-      songLink: doc.data().songLink || doc.data().songURL || ''
+    const docRef = await addDoc(collection(db, ARIA_COLLECTION), toSave);
+    const persistedAria = {
+      ...localAria,
+      ...toSave,
+      id: docRef.id,
+      createdAt: localAria.createdAt,
+      pending: false
     };
+    replaceLocalAria(localAria.id, persistedAria);
+    return persistedAria;
   } catch (error) {
-    console.error('Error finding aria by recipient:', error);
-    return null;
+    // The local record is intentionally retained for the sender; Firestore
+    // will be retried when the user sends again after connectivity is restored.
+    console.error('Error saving aria to Firebase:', error);
+    return localAria;
+  }
+};
+
+const snapshotToArias = snapshot => snapshot.docs.map(item => normalizeAria({ id: item.id, ...item.data() }));
+
+export const findAriasByRecipient = async name => {
+  const recipient = name?.trim();
+  if (!recipient) return [];
+  const key = toKey(recipient);
+  const localMatches = getLocalArias().filter(aria => aria.recipientKey === key);
+
+  try {
+    // A single-field equality query needs no composite Firestore index.
+    const keyed = await getDocs(query(collection(db, ARIA_COLLECTION), where('recipientKey', '==', key)));
+    const legacy = await getDocs(query(collection(db, ARIA_COLLECTION), where('recipient', '==', recipient)));
+    return mergeArias(localMatches, snapshotToArias(keyed), snapshotToArias(legacy));
+  } catch (error) {
+    console.error('Error finding arias by recipient:', error);
+    return sortNewestFirst(localMatches);
   }
 };
 
 export const getAllAria = async () => {
+  const localArias = getLocalArias();
   try {
-    const q = query(
-      collection(db, ARIA_COLLECTION),
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ 
-      id: doc.id, 
-      ...doc.data(),
-      songLink: doc.data().songLink || doc.data().songURL || ''
-    }));
+    const q = query(collection(db, ARIA_COLLECTION), orderBy('createdAt', 'desc'));
+    return mergeArias(localArias, snapshotToArias(await getDocs(q)));
   } catch (error) {
     console.error('Error getting all arias:', error);
-    return [];
+    return sortNewestFirst(localArias);
   }
 };
 
-export const getAriasBySender = async (senderName) => {
-  if (!senderName) return [];
+export const getAriasBySender = async senderCode => {
+  const code = senderCode?.trim();
+  if (!code) return [];
+  const key = toKey(code);
+  const localMatches = getLocalArias().filter(aria => aria.senderCodeKey === key);
+
   try {
-    const q = query(
-      collection(db, ARIA_COLLECTION),
-      where('senderCode', '==', senderName.trim()),
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ 
-      id: doc.id, 
-      ...doc.data(),
-      songLink: doc.data().songLink || doc.data().songURL || ''
-    }));
+    const keyed = await getDocs(query(collection(db, ARIA_COLLECTION), where('senderCodeKey', '==', key)));
+    const legacy = await getDocs(query(collection(db, ARIA_COLLECTION), where('senderCode', '==', code)));
+    return mergeArias(localMatches, snapshotToArias(keyed), snapshotToArias(legacy));
   } catch (error) {
     console.error('Error getting arias by sender:', error);
-    return [];
+    return sortNewestFirst(localMatches);
   }
 };
 
-export const deleteAria = async (ariaId) => {
+export const deleteAria = async ariaId => {
   if (!ariaId) return false;
+  removeLocalAria(ariaId);
+  if (ariaId.startsWith('local_')) return true;
   try {
     await deleteDoc(doc(db, ARIA_COLLECTION, ariaId));
     return true;
@@ -97,78 +151,41 @@ export const deleteAria = async (ariaId) => {
 };
 
 export const subscribeToArias = (callback, maxCount = 20) => {
+  const localArias = getLocalArias();
   try {
-    const q = query(
-      collection(db, ARIA_COLLECTION),
-      orderBy('createdAt', 'desc'),
-      limit(maxCount)
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const arias = snapshot.docs.map(doc => ({ 
-        id: doc.id, 
-        ...doc.data(),
-        songLink: doc.data().songLink || doc.data().songURL || ''
-      }));
-      callback(arias);
-    }, (error) => {
+    const q = query(collection(db, ARIA_COLLECTION), orderBy('createdAt', 'desc'), limit(maxCount));
+    return onSnapshot(q, snapshot => callback(mergeArias(localArias, snapshotToArias(snapshot)).slice(0, maxCount)), error => {
       console.error('Error listening to arias:', error);
+      callback(sortNewestFirst(localArias).slice(0, maxCount));
     });
-    return unsubscribe;
   } catch (error) {
     console.error('Error setting up aria subscription:', error);
+    callback(sortNewestFirst(localArias).slice(0, maxCount));
     return () => {};
   }
 };
 
-// User Code Management Functions
-export const checkCodeExists = async (code) => {
+export const checkCodeExists = async code => {
   if (!code) return false;
   try {
-    const docRef = doc(db, USER_CODES_COLLECTION, code);
-    const docSnap = await getDoc(docRef);
-    return docSnap.exists();
-  } catch (error) {
-    console.error('Error checking code existence:', error);
+    return (await getDoc(doc(db, USER_CODES_COLLECTION, code))).exists();
+  } catch {
     return false;
   }
 };
 
-export const registerUserCode = async (code) => {
-  if (!code || !/^\d{4}$/.test(code)) {
-    throw new Error('Invalid code format');
-  }
-
-  try {
-    await setDoc(doc(db, USER_CODES_COLLECTION, code), {
-      code: code,
-      createdAt: serverTimestamp()
-    }, { merge: true });
-    return true;
-  } catch (error) {
-    console.error('Error registering user code:', error);
-    throw error;
-  }
+export const registerUserCode = async code => {
+  if (!code || !/^\d{4}$/.test(code)) throw new Error('Invalid code format');
+  await setDoc(doc(db, USER_CODES_COLLECTION, code), { code, createdAt: serverTimestamp() }, { merge: true });
+  return true;
 };
 
 export const getAllUserCodes = async () => {
   try {
-    const q = query(collection(db, USER_CODES_COLLECTION), orderBy('createdAt', 'desc'));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => doc.data());
-  } catch (error) {
-    console.error('Error getting all user codes:', error);
+    return (await getDocs(query(collection(db, USER_CODES_COLLECTION), orderBy('createdAt', 'desc')))).docs.map(item => item.data());
+  } catch {
     return [];
   }
 };
 
-export default {
-  saveAria,
-  findAriaByRecipient,
-  getAllAria,
-  getAriasBySender,
-  deleteAria,
-  subscribeToArias,
-  checkCodeExists,
-  registerUserCode,
-  getAllUserCodes
-};
+export default { saveAria, findAriasByRecipient, getAllAria, getAriasBySender, deleteAria, subscribeToArias, checkCodeExists, registerUserCode, getAllUserCodes };

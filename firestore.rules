@@ -9,7 +9,9 @@ service cloud.firestore {
       allow create: if request.resource.data.recipient is string
         && request.resource.data.message is string
         && request.resource.data.songLink is string
-        && request.resource.data.senderCode is string;
+        && request.resource.data.senderCode is string
+        && request.resource.data.recipientKey is string
+        && request.resource.data.senderCodeKey is string;
       allow delete: if true;
     }
 

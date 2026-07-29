@@ -65,7 +65,8 @@ const ProfileModal = ({ onCancel, onDelete, userCode, onLogout, onStatusMessage 
 
   const formatTimestamp = (date) => {
     if (!date) return '';
-    const d = new Date(date);
+    const d = date.toDate ? date.toDate() : new Date(date);
+    if (Number.isNaN(d.getTime())) return '';
     return d.toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
