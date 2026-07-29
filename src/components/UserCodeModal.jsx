@@ -83,7 +83,7 @@ const UserCodeModal = ({ onCodeSubmit, onCancel }) => {
     }
 
     // Check for exact match
-    if (adminName.trim() !== 'Hannah Bella') {
+    if (adminName.trim() !== 'Hale Ylana') {
       setAdminNameError('Incorrect name. Access denied.');
       setAdminName('');
       return;

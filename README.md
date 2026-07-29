@@ -81,14 +81,23 @@ This project is configured for automatic deployment to GitHub Pages using GitHub
 ```
 
 This script will:
-- Build the project
-- Commit and push changes to main
-- Trigger GitHub Actions deployment
+- Build the project locally to verify it works
+- Commit and push source code changes to main
+- Trigger GitHub Actions to build and deploy
 
-**GitHub Pages Configuration**:
-- Source: `gh-pages` branch (automatically managed by GitHub Actions)
+**IMPORTANT: GitHub Pages Configuration Required**
+You must configure GitHub Pages to use GitHub Actions as the source:
+
+1. Go to your repository on GitHub
+2. Navigate to **Settings** → **Pages**
+3. Under **Source**, select **GitHub Actions** (NOT "Deploy from a branch")
+4. The workflow in `.github/workflows/deploy.yml` will handle deployment
+5. Under **Settings** → **Actions** → **General**, ensure "Read and write permissions" is selected
+
+**Configuration Details**:
 - Base path: `/HARIAH/` (configured in `vite.config.js`)
 - Build output: `dist/` directory
+- GitHub Actions builds and deploys automatically on push to main
 
 ### Vercel
 
