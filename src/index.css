@@ -18,11 +18,6 @@ body {
   min-height: 100vh;
 }
 
-/* Hide all iframes globally */
-iframe {
-  display: none !important;
-}
-
 /* DomeGallery scroll lock */
 .dg-scroll-lock {
   overflow: hidden !important;
@@ -38,15 +33,15 @@ iframe {
 @keyframes aria-status-fade {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) translateY(-8px);
+    transform: translateY(-8px);
   }
   15%,
   78% {
     opacity: 1;
-    transform: translate(-50%, -50%) translateY(0);
+    transform: translateY(0);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) translateY(-8px);
+    transform: translateY(-8px);
   }
 }

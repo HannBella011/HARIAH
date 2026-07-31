@@ -127,7 +127,7 @@ function App() {
         // Admin code - don't register, just set it
         setUserCode(code);
         localStorage.setItem('userCode', code);
-        setStatusMessage(`Welcome, Code ${code}!`);
+        setStatusMessage(`Welcome code ${code}!`);
         
         // If user was trying to send aria, show send modal after code entry
         if (pendingSendAria) {
@@ -145,7 +145,7 @@ function App() {
       // database has restrictive rules or is temporarily unavailable.
       setUserCode(code);
       localStorage.setItem('userCode', code);
-      setStatusMessage(`Welcome, Code ${code}!`);
+      setStatusMessage(`Welcome code ${code}!`);
       
       // If user was trying to send aria, show send modal after code entry
       if (pendingSendAria) {
@@ -171,8 +171,10 @@ function App() {
   };
 
   const handleLogout = () => {
+    const loggedOutCode = userCode;
     setUserCode(null);
-    setShowUserCodeModal(true);
+    setShowProfileModal(false);
+    setStatusMessage(`Goodbye code ${loggedOutCode || ''}!`);
   };
 
   useEffect(() => {
@@ -257,12 +259,18 @@ function App() {
         </div>
       </div>
 
-      <div className="fixed bottom-8 left-0 right-0 text-center z-40 pointer-events-none">
+      <div className="fixed bottom-4 left-0 right-0 text-center z-40 pointer-events-none px-4">
         <p
           className="text-white text-xl md:text-2xl opacity-90"
           style={{ fontFamily: 'var(--button-font)' }}
         >
           Send musical messages with pictures to the people you care about.
+        </p>
+        <p
+          className="mt-1 text-white/70 text-xs md:text-sm"
+          style={{ fontFamily: 'var(--button-font)' }}
+        >
+          © HARIAH. All rights reserved.
         </p>
       </div>
 
@@ -277,7 +285,7 @@ function App() {
       </main>
 
       {statusMessage && (
-        <div className="fixed left-1/2 top-28 z-[90] -translate-x-1/2 text-center text-white text-xl aria-status" style={{ fontFamily: 'var(--button-font)' }}>
+        <div className="fixed inset-0 z-[90] grid place-items-center pointer-events-none px-4 text-center text-white text-xl aria-status" style={{ fontFamily: 'var(--button-font)' }}>
           {statusMessage}
         </div>
       )}
@@ -296,7 +304,6 @@ function App() {
           }}
           userCode={userCode}
           onLogout={handleLogout}
-          onStatusMessage={setStatusMessage}
         />
       )}
 

@@ -84,15 +84,19 @@ const SearchAriaModal = ({ onResultFound, onCancel }) => {
         {results.length > 1 && (
           <div className="mb-4 space-y-2">
             <p className="text-center text-sm text-gray-600">Choose the Aria you want to open:</p>
-            {results.map((aria, index) => (
+            {results.map(aria => (
               <button
                 key={aria.id}
                 type="button"
                 onClick={() => onResultFound(aria)}
                 className="w-full rounded-lg border border-gray-300 p-3 text-left hover:border-black hover:bg-gray-50 transition-colors"
               >
-                <span className="block font-semibold text-black">Aria {index + 1}</span>
-                <span className="block truncate text-sm text-gray-600">{aria.message}</span>
+                {aria.imageURL || aria.picture ? (
+                  <img src={aria.imageURL || aria.picture} alt={`Aria for ${aria.recipient}`} className="h-24 w-full rounded-md object-cover" />
+                ) : (
+                  <span className="block font-semibold text-black">Aria</span>
+                )}
+                <span className="block text-sm text-gray-600">...</span>
               </button>
             ))}
           </div>

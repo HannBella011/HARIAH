@@ -23,6 +23,26 @@ const readFileAsDataUrl = file =>
     reader.readAsDataURL(file);
   });
 
+const getSongEmbed = songLink => {
+  if (!songLink) return null;
+  try {
+    const url = new URL(songLink);
+    if (url.hostname.includes('spotify.com')) {
+      const [type, id] = url.pathname.split('/').filter(Boolean);
+      return id ? { url: `https://open.spotify.com/embed/${type || 'track'}/${id}`, title: 'Spotify preview' } : null;
+    }
+    if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+      const id = url.hostname.includes('youtu.be')
+        ? url.pathname.split('/').filter(Boolean)[0]
+        : url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop();
+      return id ? { url: `https://www.youtube.com/embed/${id}?playsinline=1&rel=0`, title: 'YouTube preview' } : null;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+};
+
 const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
   const [formData, setFormData] = useState({
     recipient: '',
@@ -34,6 +54,7 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
+  const songPreview = getSongEmbed(formData.songLink);
 
   // Update senderCode when userCode prop changes
   useEffect(() => {
@@ -135,7 +156,7 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
     } catch (err) {
       console.error('Error sending Aria:', err);
       setIsSubmitting(false);
-      onError?.();
+      setError('Unable to send your Aria. Please try again.');
     }
   };
 
@@ -285,15 +306,28 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
               aria-label="Upload a picture"
             />
             {previewUrl && (
-              <div className="mt-4">
+              <div className="mt-4 flex justify-center">
                 <img 
                   src={previewUrl} 
                   alt="Preview" 
-                  className="w-full h-48 object-cover rounded-lg border border-black"
+                  className="h-[350px] w-[250px] max-w-full rounded-[30px] border border-black object-cover shadow-lg"
                 />
               </div>
             )}
           </div>
+
+          {songPreview && (
+            <div>
+              <p className="mb-2 text-sm font-medium text-black" style={{ fontFamily: 'var(--button-font)' }}>Song Preview</p>
+              <iframe
+                className="h-20 w-full rounded-lg border-0"
+                src={songPreview.url}
+                title={songPreview.title}
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 pt-4">

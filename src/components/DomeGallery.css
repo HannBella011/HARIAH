@@ -260,7 +260,7 @@ main.sphere-main {
 }
 
 .aria-song-frame {
-  display: none; /* Hide the player */
+  display: block;
   position: absolute;
   left: 50%;
   top: calc(50% + 190px);
@@ -327,7 +327,7 @@ main.sphere-main {
   }
 
   .aria-song-frame {
-    display: none; /* Hide the player on mobile */
+    display: block;
     top: calc(50% + 180px);
     width: min(82vw, 340px);
     height: 72px;
@@ -344,7 +344,7 @@ main.sphere-main {
   }
 
   .aria-song-frame {
-    display: none; /* Hide the player on small screens */
+    display: block;
     top: calc(50% + 160px);
     height: 64px;
   }
