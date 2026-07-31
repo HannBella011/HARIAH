@@ -1,294 +1,307 @@
 .sphere-root {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  --radius: 520px;
-  --viewer-pad: 72px;
-  --circ: calc(var(--radius) * 3.14);
-  --rot-y: calc((360deg / var(--segments-x)) / 2);
-  --rot-x: calc((360deg / var(--segments-y)) / 2);
-  --item-width: calc(var(--circ) / var(--segments-x));
-  --item-height: calc(var(--circ) / var(--segments-y));
+  position: relative; /* Position relative to parent - keeps children positioned relative to this container */
+  width: 100%; /* Full width of parent container - adjust to change overall width */
+  height: 100%; /* Full height of parent container - adjust to change overall height */
+  --radius: 520px; /* Radius of the sphere - increase for larger sphere, decrease for smaller */
+  --viewer-pad: 72px; /* Padding around the viewer when image is enlarged - adjust for more/less spacing */
+  --circ: calc(var(--radius) * 3.14); /* Circumference calculation (π × radius) - don't modify manually */
+  --rot-y: calc((360deg / var(--segments-x)) / 2); /* Horizontal rotation per item - depends on segments-x variable */
+  --rot-x: calc((360deg / var(--segments-y)) / 2); /* Vertical rotation per item - depends on segments-y variable */
+  --item-width: calc(var(--circ) / var(--segments-x)); /* Width of each gallery item - calculated based on segments */
+  --item-height: calc(var(--circ) / var(--segments-y)); /* Height of each gallery item - calculated based on segments */
 }
 
 .sphere-root * {
-  box-sizing: border-box;
+  box-sizing: border-box; /* Include padding/border in element dimensions - keeps sizing consistent */
 }
 
 .sphere,
 .item,
 .item__image {
-  transform-style: preserve-3d;
+  transform-style: preserve-3d; /* Enable 3D transformations for these elements - essential for sphere effect */
 }
 
 main.sphere-main {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  background: transparent;
+  position: absolute; /* Position absolutely within parent - fills entire container */
+  inset: 0; /* Shorthand for top:0, right:0, bottom:0, left:0 - fills parent */
+  display: grid; /* CSS Grid layout - centers content */
+  place-items: center; /* Center items both horizontally and vertically */
+  overflow: hidden; /* Hide content that extends beyond container - prevents scrollbars */
+  touch-action: none; /* Disable default touch behaviors - allows custom gesture handling */
+  user-select: none; /* Prevent text selection - improves touch interaction */
+  -webkit-user-select: none; /* Safari/Chrome version of user-select */
+  background: transparent; /* Transparent background - shows whatever is behind */
 }
 
 .stage {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  perspective: calc(var(--radius) * 2);
-  perspective-origin: 50% 50%;
-  contain: layout paint size;
+  width: 100%; /* Full width of container */
+  height: 100%; /* Full height of container */
+  display: grid; /* CSS Grid layout for centering */
+  place-items: center; /* Center the sphere in the stage */
+  perspective: calc(var(--radius) * 2); /* 3D perspective depth - higher = less distortion, lower = more dramatic */
+  perspective-origin: 50% 50%; /* Perspective vanishing point at center - adjust to shift viewing angle */
+  contain: layout paint size; /* Performance optimization - tells browser to isolate this element */
 }
 
 .sphere {
-  transform: translateZ(calc(var(--radius) * -1));
-  will-change: transform;
+  transform: translateZ(calc(var(--radius) * -1)); /* Move sphere back by radius - creates hollow sphere effect */
+  will-change: transform; /* Performance hint - tells browser to optimize transform animations */
 }
 
 .overlay,
 .overlay--blur {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  z-index: 3;
-  pointer-events: none;
+  position: absolute; /* Position absolutely within parent */
+  inset: 0; /* Fill entire parent container */
+  margin: auto; /* Center the overlay */
+  z-index: 3; /* Stack order - higher = on top of other elements */
+  pointer-events: none; /* Allow clicks to pass through overlay - doesn't block interactions */
 }
 
 .overlay {
-  background-image: radial-gradient(rgba(235, 235, 235, 0) 65%, var(--overlay-blur-color, #120F17) 100%);
+  background-image: radial-gradient(rgba(235, 235, 235, 0) 65%, var(--overlay-blur-color, #120F17) 100%); /* Radial gradient from transparent to dark - creates vignette effect at edges. Change --overlay-blur-color to adjust fade color */
 }
 
 .overlay--blur {
-  -webkit-mask-image: radial-gradient(rgba(235, 235, 235, 0) 70%, var(--overlay-blur-color, #120F17) 90%);
-  mask-image: radial-gradient(rgba(235, 235, 235, 0) 70%, var(--overlay-blur-color, #120F17) 90%);
-  backdrop-filter: blur(3px);
+  -webkit-mask-image: radial-gradient(rgba(235, 235, 235, 0) 70%, var(--overlay-blur-color, #120F17) 90%); /* Safari mask for gradient fade */
+  mask-image: radial-gradient(rgba(235, 235, 235, 0) 70%, var(--overlay-blur-color, #120F17) 90%); /* Standard mask for gradient fade - creates soft edges */
+  backdrop-filter: blur(3px); /* Blur effect behind overlay - increase px for more blur */
 }
 
 .item {
-  width: calc(var(--item-width) * var(--item-size-x));
-  height: calc(var(--item-height) * var(--item-size-y));
-  position: absolute;
-  top: -999px;
-  bottom: -999px;
-  left: -999px;
-  right: -999px;
-  margin: auto;
-  transform-origin: 50% 50%;
-  backface-visibility: hidden;
-  transition: transform 300ms;
-  transform: rotateY(calc(var(--rot-y) * (var(--offset-x) + ((var(--item-size-x) - 1) / 2)) + var(--rot-y-delta, 0deg)))
-    rotateX(calc(var(--rot-x) * (var(--offset-y) - ((var(--item-size-y) - 1) / 2)) + var(--rot-x-delta, 0deg)))
-    translateZ(var(--radius));
+  width: calc(var(--item-width) * var(--item-size-x)); /* Item width based on calculated width and size multiplier */
+  height: calc(var(--item-height) * var(--item-size-y)); /* Item height based on calculated height and size multiplier */
+  position: absolute; /* Position absolutely for precise placement on sphere */
+  top: -999px; /* Negative positioning for centering technique - don't modify */
+  bottom: -999px; /* Negative positioning for centering technique - don't modify */
+  left: -999px; /* Negative positioning for centering technique - don't modify */
+  right: -999px; /* Negative positioning for centering technique - don't modify */
+  margin: auto; /* Centers the item within the negative positioning */
+  transform-origin: 50% 50%; /* Transform from center of item - keeps rotations centered */
+  backface-visibility: hidden; /* Hide back of element when rotated away - improves performance */
+  transition: transform 300ms; /* Animation duration for transform changes - increase for slower, smoother transitions */
+  transform: rotateY(calc(var(--rot-y) * (var(--offset-x) + ((var(--item-size-x) - 1) / 2)) + var(--rot-y-delta, 0deg))) /* Horizontal rotation calculation - positions item on sphere */
+    rotateX(calc(var(--rot-x) * (var(--offset-y) - ((var(--item-size-y) - 1) / 2)) + var(--rot-x-delta, 0deg))) /* Vertical rotation calculation - positions item on sphere */
+    translateZ(var(--radius)); /* Push item outward by radius - places on sphere surface */
 }
 
 .item__image {
-  position: absolute;
-  display: block;
-  inset: 10px;
-  border-radius: var(--tile-radius, 12px);
-  background: transparent;
-  overflow: hidden;
-  backface-visibility: hidden;
-  transition: transform 300ms;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  pointer-events: auto;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
+  position: absolute; /* Position absolutely within item */
+  display: block; /* Display as block element */
+  inset: 10px; /* Shorthand for top:10px, right:10px, bottom:10px, left:10px - creates gap around image */
+  border-radius: var(--tile-radius, 12px); /* Rounded corners - adjust --tile-radius variable or change 12px default */
+  background: transparent; /* Transparent background */
+  overflow: hidden; /* Hide content that extends beyond border - keeps image inside rounded corners */
+  backface-visibility: hidden; /* Hide back when rotated away */
+  transition: transform 300ms; /* Transform animation duration - adjust for faster/slower hover effects */
+  cursor: pointer; /* Show pointer cursor on hover - indicates clickable */
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile - cleaner touch experience */
+  touch-action: manipulation; /* Optimize touch interactions - faster tap response */
+  pointer-events: auto; /* Enable pointer events - allows clicking */
+  -webkit-transform: translateZ(0); /* Force GPU acceleration on Safari - improves performance */
+  transform: translateZ(0); /* Force GPU acceleration - improves animation performance */
 }
 
 .item__image:focus {
-  outline: none;
+  outline: none; /* Remove default focus outline - can add custom focus style if needed for accessibility */
 }
 
 .item__image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-  backface-visibility: hidden;
-  filter: var(--image-filter, none);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  width: 100%; /* Fill container width */
+  height: 100%; /* Fill container height */
+  object-fit: cover; /* Crop image to fill container while maintaining aspect ratio - change to 'contain' to show full image */
+  pointer-events: none; /* Disable pointer events on image - lets clicks pass to parent */
+  backface-visibility: hidden; /* Hide back when rotated */
+  filter: var(--image-filter, none); /* Apply custom filter if set - use --image-filter variable for effects like grayscale, blur, etc. */
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out; /* Animation for opacity and transform - adjust timing for fade speed */
 }
 
 .item__image img.new-image {
-  opacity: 0;
-  transform: scale(0.5);
-  animation: fadeInZoom 0.6s ease-out forwards;
+  opacity: 0; /* Start invisible - for animation */
+  transform: scale(0.5); /* Start at half size - for animation */
+  animation: fadeInZoom 0.6s ease-out forwards; /* Apply fade-in zoom animation - adjust duration for faster/slower effect */
 }
 
 @keyframes fadeInZoom {
   0% {
-    opacity: 0;
-    transform: scale(0.5);
+    opacity: 0; /* Start completely invisible */
+    transform: scale(0.5); /* Start at half size */
   }
   50% {
-    opacity: 0.7;
-    transform: scale(1.05);
+    opacity: 0.7; /* Partially visible at midpoint */
+    transform: scale(1.05); /* Slightly larger than normal - creates bounce effect */
   }
   100% {
-    opacity: 1;
-    transform: scale(1);
+    opacity: 1; /* Fully visible at end */
+    transform: scale(1); /* Normal size at end */
   }
 }
 
 .viewer {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--viewer-pad);
+  position: absolute; /* Position absolutely within parent */
+  inset: 0; /* Fill entire parent container */
+  z-index: 20; /* Stack order - higher than sphere, lower than overlays */
+  pointer-events: none; /* Allow clicks to pass through - only enlarged image will be clickable */
+  display: flex; /* Flexbox layout for centering */
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
+  padding: var(--viewer-pad); /* Padding around viewer - controlled by --viewer-pad variable (default 72px) */
 }
 
 .viewer .frame {
-  height: 100%;
-  aspect-ratio: 1;
-  border-radius: var(--enlarge-radius, 32px);
-  display: flex;
+  height: 100%; /* Full height of viewer */
+  aspect-ratio: 1; /* Maintain 1:1 square aspect ratio - change to adjust shape */
+  border-radius: var(--enlarge-radius, 32px); /* Rounded corners - adjust --enlarge-radius variable or change 32px default */
+  display: flex; /* Flexbox layout */
 }
 
 @media (max-aspect-ratio: 1/1) {
+  /* On portrait/tall screens (height > width) */
   .viewer .frame {
-    height: auto;
-    width: 100%;
+    height: auto; /* Let height adjust automatically */
+    width: 100%; /* Fill full width */
   }
 }
 
 .viewer .scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  background: rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 500ms ease;
-  backdrop-filter: blur(3px);
+  position: absolute; /* Position absolutely within viewer */
+  inset: 0; /* Fill entire viewer */
+  z-index: 10; /* Stack order - behind enlarged image */
+  background: rgba(0, 0, 0, 0.4); /* Semi-transparent black background - adjust opacity (0.4) for lighter/darker */
+  pointer-events: none; /* Allow clicks to pass through when invisible */
+  opacity: 0; /* Start invisible - fades in when enlarging */
+  transition: opacity 500ms ease; /* Fade animation duration - adjust for faster/slower fade */
+  backdrop-filter: blur(3px); /* Blur background behind scrim - increase px for more blur */
 }
 
 .sphere-root[data-enlarging='true'] .viewer .scrim {
-  opacity: 1;
-  pointer-events: all;
+  /* When image is being enlarged (data-enlarging attribute is true) */
+  opacity: 1; /* Make scrim fully visible */
+  pointer-events: all; /* Enable clicks - scrim becomes clickable to close enlarged view */
 }
 
 .viewer .enlarge {
-  position: absolute;
-  z-index: 30;
-  border-radius: var(--enlarge-radius, 32px);
-  overflow: hidden;
+  position: absolute; /* Position absolutely within viewer */
+  z-index: 30; /* Stack order - highest, appears on top of everything */
+  border-radius: var(--enlarge-radius, 32px); /* Rounded corners - adjust --enlarge-radius variable or change 32px default */
+  overflow: hidden; /* Hide content that extends beyond border - keeps image inside rounded corners */
   transition:
-    transform 500ms ease,
-    opacity 500ms ease;
-  transform-origin: top left;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    transform 500ms ease, /* Transform animation duration - adjust for faster/s smoother zoom */
+    opacity 500ms ease; /* Opacity animation duration - adjust for faster/slower fade */
+  transform-origin: top left; /* Transform from top-left corner - important for zoom animation */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); /* Drop shadow - adjust spread (10px, 30px) and opacity (0.35) for shadow intensity */
 }
 
 .viewer .enlarge img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: var(--image-filter, none);
+  width: 100%; /* Fill container width */
+  height: 100%; /* Fill container height */
+  object-fit: cover; /* Crop image to fill container - change to 'contain' to show full image */
+  filter: var(--image-filter, none); /* Apply custom filter if set - use --image-filter variable for effects */
 }
 
 @media (max-width: 600px) {
+  /* On small screens/mobile devices (width <= 600px) */
   .viewer {
-    padding: 0;
+    padding: 0; /* Remove padding on mobile - image fills screen */
   }
   .viewer .enlarge {
-    width: min(44vw, 250px) !important;
-    height: min(62vw, 350px) !important;
+    width: min(44vw, 250px) !important; /* Width: 44% of viewport width, max 250px - adjust these values */
+    height: min(62vw, 350px) !important; /* Height: 62% of viewport width, max 350px - adjust these values */
   }
 }
 
 .sphere-root .enlarge-closing img {
-  filter: var(--image-filter, none);
+  /* When enlarged image is closing (has enlarge-closing class) */
+  filter: var(--image-filter, none); /* Apply custom filter if set - maintains filter during close animation */
 }
 
 .edge-fade {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 120px;
-  z-index: 5;
-  pointer-events: none;
-  background: linear-gradient(to bottom, transparent, var(--overlay-blur-color, #120F17));
+  position: absolute; /* Position absolutely */
+  left: 0; /* Align to left edge */
+  right: 0; /* Extend to right edge */
+  height: 120px; /* Height of fade effect - adjust for taller/shorter fade */
+  z-index: 5; /* Stack order - above sphere, below viewer */
+  pointer-events: none; /* Allow clicks to pass through */
+  background: linear-gradient(to bottom, transparent, var(--overlay-blur-color, #120F17)); /* Gradient from transparent to dark - creates fade at edges. Change --overlay-blur-color to adjust color */
 }
 
 .edge-fade--top {
-  top: 0;
-  transform: rotate(180deg);
+  top: 0; /* Position at top edge */
+  transform: rotate(180deg); /* Rotate 180 degrees - flips gradient direction for top fade */
 }
 
 .edge-fade--bottom {
-  bottom: 0;
+  bottom: 0; /* Position at bottom edge */
 }
 
 /* Aria Message Panel Styles */
 .aria-message-panel {
-  position: absolute;
-  z-index: 25;
-  background: #120F17;
-  color: white;
-  overflow-y: auto;
-  pointer-events: auto;
-  border-radius: var(--enlarge-radius, 32px);
-  font-family: var(--button-font), serif;
+  position: absolute;        /* Keeps it fixed relative to parent */
+  top: 0;                    /* Anchors to the top */
+  left: 0;                   /* Anchors to the left side */
+  margin-left: 0;            /* Removed negative margin to prevent overlap */
+  width: auto;               /* Let width be controlled by JSX positioning */
+  min-width: 500px;          /* Minimum width for readability */
+  height: 100%;              /* Matches image height */
+  min-height: 350px;         /* Minimum height - adjust for taller/shorter panel */
+  z-index: 10;               /* Keeps it above viewer, below notices */
+  color: white;              /* Text color */
+  overflow: hidden;          /* No scrolling - text must fit within panel */
+  pointer-events: auto;      /* Allows scrolling and interaction */
+  font-family: var(--button-font), serif; /* Font family */
+  text-align: justify;       /* Aligns text evenly on both sides */
+  text-justify: inter-word;  /* Improves word spacing */
+  background: none;          /* No blur or semi-transparent background */
+  white-space: normal;       /* Ensures natural text wrapping */
+  word-wrap: break-word;     /* Prevents overflow */
 }
 
+
+/* 🌸 Message Text Styles */
 .aria-message-text {
-  margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+  margin: 0;                 /* Removes default margins */
+  font-size: 1.25rem;        /* 🔧 Adjust text size */
+  line-height: 1.5;          /* 🔧 Adjust line spacing */
+  white-space: normal;       /* Allows natural text wrapping */
+  word-wrap: break-word;     /* Prevents overflow */
+  text-align: justify;       /* Ensures justified alignment */
+  text-justify: inter-word;  /* Smooth spacing between words */
+  overflow: hidden;          /* Hide overflow text */
+  display: -webkit-box;      /* Enable line clamping */
+  -webkit-line-clamp: 10;    /* Limit to approximately 10 lines */
+  line-clamp: 10;            /* Standard property for compatibility */
+  -webkit-box-orient: vertical; /* Vertical orientation for line clamping */
 }
 
-/* Desktop Layout - text panel on left, image on right */
-@media (min-width: 769px) {
-  .aria-message-panel {
-    padding: 50px;
-    min-width: 250px;
-    min-height: 350px;
-  }
-}
-
-/* Mobile/Tablet Layout - image on top, text panel below */
 @media (max-width: 768px) {
+  /* On tablets and smaller screens (width <= 768px) */
   .aria-message-panel {
-    padding: 30px;
-    width: 100%;
-    max-width: min(44vw, 250px);
-    height: auto;
+    padding: 30px; /* Reduce padding on smaller screens - adjust for more/less space */
   }
 }
 
 .aria-message-panel--long {
-  font-size: 1.1rem;
+  /* Variant for longer messages */
+  font-size: 1.1rem; /* Slightly smaller font for longer text - adjust for readability */
 }
 
 .aria-message-panel--extra-long {
-  font-size: 1rem;
+  /* Variant for very long messages */
+  font-size: 1rem; /* Even smaller font for very long text - adjust for readability */
 }
 
 .aria-success-notice {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 35;
-  background: #ffffff;
-  color: #120F17;
-  padding: 12px 24px;
-  border-radius: 20px;
-  font-family: var(--button-font), serif;
-  font-size: 1rem;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  pointer-events: none;
-  white-space: nowrap;
+  position: absolute; /* Position absolutely within parent */
+  top: 20px; /* Distance from top edge - adjust to move notice up/down */
+  left: 20px; /* Distance from left edge - adjust to move notice left/right */
+  z-index: 35; /* Stack order - highest, appears on top of everything */
+  background: #ffffff; /* White background - change hex code for different color */
+  color: #120F17; /* Dark text color - change hex code for different color */
+  padding: 12px 24px; /* Internal spacing - adjust for more/less padding */
+  border-radius: 20px; /* Rounded corners - adjust for more/less rounded */
+  font-family: var(--button-font), serif; /* Font family - uses --button-font variable with serif fallback */
+  font-size: 1rem; /* Text size - adjust for larger/smaller text */
+  font-weight: 600; /* Font weight - 600 is semi-bold, adjust for lighter/bolder */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Drop shadow - adjust spread (4px, 12px) and opacity (0.3) for shadow intensity */
+  pointer-events: none; /* Allow clicks to pass through - notice is decorative */
+  white-space: nowrap; /* Prevent text wrapping - keeps notice on single line */
 }

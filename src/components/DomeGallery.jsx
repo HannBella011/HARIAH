@@ -474,10 +474,22 @@ export default function DomeGallery({
       if (!originalPos) {
         overlay.remove();
         if (refDiv) refDiv.remove();
-        const messagePanel = viewerRef.current?.querySelector('.aria-message-panel');
+        const leftPanel = viewerRef.current?.querySelector('.aria-message-panel--left');
+        const rightPanel = viewerRef.current?.querySelector('.aria-message-panel--right');
         const songFrame = viewerRef.current?.querySelector('.aria-song-frame');
         const noticePanel = viewerRef.current?.querySelector('.aria-success-notice');
-        if (messagePanel) messagePanel.remove();
+        if (leftPanel) {
+          if (leftPanel._resizeObserver) {
+            leftPanel._resizeObserver.disconnect();
+          }
+          leftPanel.remove();
+        }
+        if (rightPanel) {
+          if (rightPanel._resizeObserver) {
+            rightPanel._resizeObserver.disconnect();
+          }
+          rightPanel.remove();
+        }
         if (songFrame) songFrame.remove();
         if (noticePanel) noticePanel.remove();
         openedAriaRef.current = null;
@@ -515,10 +527,22 @@ export default function DomeGallery({
         animatingOverlay.appendChild(img);
       }
       overlay.remove();
-      const messagePanel = viewerRef.current?.querySelector('.aria-message-panel');
+      const leftPanel = viewerRef.current?.querySelector('.aria-message-panel--left');
+      const rightPanel = viewerRef.current?.querySelector('.aria-message-panel--right');
       const songFrame = viewerRef.current?.querySelector('.aria-song-frame');
       const noticePanel = viewerRef.current?.querySelector('.aria-success-notice');
-      if (messagePanel) messagePanel.remove();
+      if (leftPanel) {
+        if (leftPanel._resizeObserver) {
+          leftPanel._resizeObserver.disconnect();
+        }
+        leftPanel.remove();
+      }
+      if (rightPanel) {
+        if (rightPanel._resizeObserver) {
+          rightPanel._resizeObserver.disconnect();
+        }
+        rightPanel.remove();
+      }
       if (songFrame) songFrame.remove();
       if (noticePanel) noticePanel.remove();
       openedAriaRef.current = null;
@@ -610,46 +634,34 @@ export default function DomeGallery({
     const viewer = viewerRef.current;
     if (!viewer) return;
 
-    const panel = viewer.querySelector('.aria-message-panel');
+    const leftPanel = viewer.querySelector('.aria-message-panel--left');
+    const rightPanel = viewer.querySelector('.aria-message-panel--right');
     const overlay = viewer.querySelector('.enlarge');
-    if (!panel || !overlay) return;
+    if (!leftPanel || !overlay) return;
 
     const overlayRect = overlay.getBoundingClientRect();
     const viewerRect = viewer.getBoundingClientRect();
-    const isMobile = window.innerWidth <= 768;
 
-    // Clear any existing positioning styles
-    panel.style.position = 'absolute';
-    panel.style.marginTop = '0';
-    panel.style.transform = 'none';
-    panel.style.right = 'auto';
+    const gap = 300;
+    const overlayLeft = overlayRect.left - viewerRect.left;
+    const overlayTop = overlayRect.top - viewerRect.top;
 
-    if (isMobile) {
-      // Mobile/Tablet: image on top, text panel below
-      const footerHeight = 100; // Approximate footer height
-      const headerHeight = 100; // Approximate header height
-      const availableHeight = window.innerHeight - headerHeight - footerHeight;
-      const maxHeight = availableHeight - overlayRect.height - 20; // 20px gap
+    // Position left panel to the left of the image
+    leftPanel.style.position = 'absolute';
+    leftPanel.style.width = `${overlayRect.width}px`;
+    leftPanel.style.height = `${overlayRect.height}px`;
+    leftPanel.style.maxHeight = `${overlayRect.height}px`;
+    leftPanel.style.left = `${overlayLeft - overlayRect.width - gap}px`;
+    leftPanel.style.top = `${overlayTop}px`;
 
-      panel.style.width = `${overlayRect.width}px`;
-      panel.style.height = 'auto';
-      panel.style.maxHeight = `${Math.max(maxHeight, 100)}px`;
-      panel.style.left = `${overlayRect.left - viewerRect.left}px`;
-      panel.style.top = `${overlayRect.bottom - viewerRect.top + 20}px`;
-    } else {
-      // Desktop: text panel on left, image on right
-      const gap = 20;
-      const overlayLeft = overlayRect.left - viewerRect.left;
-      const overlayTop = overlayRect.top - viewerRect.top;
-
-      // Match panel dimensions to image dimensions
-      panel.style.width = `${overlayRect.width}px`;
-      panel.style.height = `${overlayRect.height}px`;
-      panel.style.maxHeight = `${overlayRect.height}px`;
-
-      // Position panel to the left of the image
-      panel.style.left = `${overlayLeft - overlayRect.width - gap}px`;
-      panel.style.top = `${overlayTop}px`;
+    // Position right panel to the right of the image (only if it exists)
+    if (rightPanel) {
+      rightPanel.style.position = 'absolute';
+      rightPanel.style.width = `${overlayRect.width}px`;
+      rightPanel.style.height = `${overlayRect.height}px`;
+      rightPanel.style.maxHeight = `${overlayRect.height}px`;
+      rightPanel.style.left = `${overlayLeft + overlayRect.width + (viewerRect.width * 0.03)}px`;
+      rightPanel.style.top = `${overlayTop}px`;
     }
   }, []);
 
@@ -658,7 +670,8 @@ export default function DomeGallery({
       const viewer = viewerRef.current;
       if (!viewer || !aria) return;
 
-      viewer.querySelector('.aria-message-panel')?.remove();
+      viewer.querySelector('.aria-message-panel--left')?.remove();
+      viewer.querySelector('.aria-message-panel--right')?.remove();
       viewer.querySelector('.aria-song-frame')?.remove();
       viewer.querySelector('.aria-success-notice')?.remove();
 
@@ -670,20 +683,98 @@ export default function DomeGallery({
         viewer.appendChild(noticeEl);
       }
 
-      const panel = document.createElement('aside');
-      const messageLength = (aria.message || '').length;
-      panel.className = `aria-message-panel${messageLength > 140 ? ' aria-message-panel--long' : ''}${messageLength > 260 ? ' aria-message-panel--extra-long' : ''}`;
-      const message = document.createElement('p');
-      message.className = 'aria-message-text';
-      panel.appendChild(message);
-      viewer.appendChild(panel);
+      // Create left panel
+      const leftPanel = document.createElement('aside');
+      leftPanel.className = 'aria-message-panel aria-message-panel--left';
+      const leftMessage = document.createElement('p');
+      leftMessage.className = 'aria-message-text';
+      leftPanel.appendChild(leftMessage);
+      viewer.appendChild(leftPanel);
+
+      // Create right panel (initially hidden, will be shown if needed)
+      let rightPanel = null;
+      let rightMessage = null;
+
+      // Add ResizeObserver to keep panels positioned during animations
+      const overlay = viewer.querySelector('.enlarge');
+      if (overlay) {
+        const resizeObserver = new ResizeObserver(() => {
+          positionMessagePanel();
+        });
+        resizeObserver.observe(overlay);
+        leftPanel._resizeObserver = resizeObserver;
+      }
+
       requestAnimationFrame(() => positionMessagePanel());
 
+      // Typing effect that distributes text between left and right panels
       let index = 0;
       const fullMessage = aria.message || '';
       const typeNext = () => {
-        if (!panel.isConnected) return;
-        message.textContent = fullMessage.slice(0, index);
+        if (!leftPanel.isConnected) return;
+
+        // Set current text in left panel
+        leftMessage.textContent = fullMessage.slice(0, index);
+
+        // Check if text exceeds 10 lines (overflow)
+        const isOverflowing = leftMessage.scrollHeight > leftMessage.clientHeight;
+
+        if (isOverflowing && !rightPanel) {
+          // Create right panel when left panel overflows
+          rightPanel = document.createElement('aside');
+          rightPanel.className = 'aria-message-panel aria-message-panel--right';
+          rightMessage = document.createElement('p');
+          rightMessage.className = 'aria-message-text';
+          rightPanel.appendChild(rightMessage);
+          viewer.appendChild(rightPanel);
+
+          // Add ResizeObserver to right panel
+          const overlay = viewer.querySelector('.enlarge');
+          if (overlay && leftPanel._resizeObserver) {
+            rightPanel._resizeObserver = leftPanel._resizeObserver;
+          }
+
+          // Find the split point (where text starts overflowing)
+          let splitIndex = index;
+          leftMessage.textContent = fullMessage.slice(0, splitIndex);
+          while (leftMessage.scrollHeight > leftMessage.clientHeight && splitIndex > 0) {
+            splitIndex -= 1;
+            leftMessage.textContent = fullMessage.slice(0, splitIndex);
+          }
+
+          // Find the nearest space before splitIndex to avoid cutting words
+          const textBeforeSplit = fullMessage.slice(0, splitIndex);
+          const lastSpaceIndex = textBeforeSplit.lastIndexOf(' ');
+          if (lastSpaceIndex > 0) {
+            splitIndex = lastSpaceIndex;
+          }
+
+          // Set text in both panels
+          leftMessage.textContent = fullMessage.slice(0, splitIndex);
+          rightMessage.textContent = fullMessage.slice(splitIndex, index);
+
+          positionMessagePanel();
+        } else if (rightPanel && rightPanel.isConnected) {
+          // Distribute text between both panels
+          // Find split point for left panel (10 lines max)
+          let splitIndex = index;
+          leftMessage.textContent = fullMessage.slice(0, splitIndex);
+          while (leftMessage.scrollHeight > leftMessage.clientHeight && splitIndex > 0) {
+            splitIndex -= 1;
+            leftMessage.textContent = fullMessage.slice(0, splitIndex);
+          }
+
+          // Find the nearest space before splitIndex to avoid cutting words
+          const textBeforeSplit = fullMessage.slice(0, splitIndex);
+          const lastSpaceIndex = textBeforeSplit.lastIndexOf(' ');
+          if (lastSpaceIndex > 0) {
+            splitIndex = lastSpaceIndex;
+          }
+
+          leftMessage.textContent = fullMessage.slice(0, splitIndex);
+          rightMessage.textContent = fullMessage.slice(splitIndex, index);
+        }
+
         index += 1;
         if (index <= fullMessage.length) {
           window.setTimeout(typeNext, 45);
@@ -704,7 +795,7 @@ export default function DomeGallery({
         iframe.allowFullscreen = true;
         iframe.style.cssText = 'position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: none;';
         viewer.appendChild(iframe);
-        
+
         // Try to trigger playback after a short delay to handle autoplay restrictions
         setTimeout(() => {
           try {
@@ -909,7 +1000,10 @@ export default function DomeGallery({
     if (!viewer) return undefined;
 
     const handleReposition = () => {
-      if (viewer.querySelector('.aria-message-panel')) {
+      const panel = viewer.querySelector('.aria-message-panel');
+      if (panel) {
+        // Reset positioned flag to allow repositioning on resize
+        delete panel.dataset.positioned;
         positionMessagePanel();
       }
     };

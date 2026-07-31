@@ -229,11 +229,15 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
               onChange={handleChange}
               placeholder="Write a personal message..."
               rows={4}
+              maxLength={1000}
               className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all resize-none"
               style={{ fontFamily: 'var(--button-font)' }}
               required
               aria-required="true"
             />
+            <div className="text-right text-xs text-gray-500 mt-1" style={{ fontFamily: 'var(--button-font)' }}>
+              {formData.message.length}/1000 characters
+            </div>
           </div>
 
           {/* Song Link Field */}
