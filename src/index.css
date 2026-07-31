@@ -161,3 +161,20 @@ body {
     height: 5rem;
   }
 }
+
+@media (max-width: 600px) {
+  .aria-message {
+    text-align: justify;
+  }
+}
+.aria-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.aria-message {
+  max-height: 200px;   /* adjust height as needed */
+  overflow-y: auto;    /* makes it scrollable */
+  margin-top: 10px;    /* space below image */
+}
