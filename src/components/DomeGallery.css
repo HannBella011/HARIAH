@@ -196,231 +196,13 @@ main.sphere-main {
   filter: var(--image-filter, none);
 }
 
-.aria-success-notice {
-  position: absolute;
-  top: calc(50% - 235px);
-  left: 50%;
-  z-index: 32;
-  width: min(72vw, 520px);
-  transform: translateX(-50%);
-  color: #fff;
-  font-family: var(--button-font);
-  font-size: clamp(1rem, 1.7vw, 1.55rem);
-  line-height: 1.25;
-  text-align: center;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.85);
-  pointer-events: none;
-  animation: ariaNoticeFade 2.6s ease both;
-}
-
-.aria-message-panel {
-  position: absolute;
-  top: 50%;
-  left: calc(50% + min(22vw, 130px));
-  right: auto;
-  bottom: auto;
-  z-index: 31;
-  width: min(40vw, 380px);
-  max-height: min(40vh, 350px);
-  transform: translateY(-50%);
-  overflow-x: hidden;
-  overflow-y: auto;
-  pointer-events: auto;
-  -webkit-overflow-scrolling: touch;
-  text-align: left;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 16px;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-.aria-message-panel::-webkit-scrollbar {
-  width: 4px;
-}
-
-.aria-message-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.45);
-  border-radius: 999px;
-}
-
-.aria-message-text {
-  margin: 0;
-  color: #fff;
-  font-family: var(--button-font);
-  font-size: clamp(1rem, 2vw, 2.35rem);
-  line-height: 1.35;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.75);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  text-align: justify;
-  text-justify: inter-word;
-}
-
-.aria-message-text::after {
-  content: '';
-  display: inline-block;
-  width: 2px;
-  height: 0.9em;
-  margin-left: 5px;
-  transform: translateY(0.15em);
-  background: #fff;
-  animation: ariaCaretBlink 0.9s steps(1) infinite;
-}
-
-.aria-message-panel--long .aria-message-text {
-  font-size: clamp(0.9rem, 1.45vw, 1.65rem);
-  line-height: 1.3;
-}
-
-.aria-message-panel--extra-long .aria-message-text {
-  font-size: clamp(0.78rem, 1.1vw, 1.2rem);
-  line-height: 1.25;
-}
-
-.aria-song-frame {
-  display: block;
-  position: absolute;
-  left: 50%;
-  top: auto;
-  bottom: clamp(0.85rem, 3vh, 1.5rem);
-  z-index: 32;
-  width: min(78vw, 360px);
-  height: 84px;
-  border: 0;
-  border-radius: 10px;
-  opacity: 0.92;
-  overflow: hidden;
-  transform: translateX(-50%);
-  pointer-events: auto;
-  background: rgba(0, 0, 0, 0.7);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
-}
-
-.aria-song-frame--youtube {
-  width: min(58vw, 300px);
-  height: 72px;
-}
-
-@keyframes ariaCaretBlink {
-  50% {
-    opacity: 0;
-  }
-}
-
-@keyframes ariaNoticeFade {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -10px);
-  }
-  14%,
-  78% {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -10px);
-  }
-}
-
-@media (min-width: 769px) {
-  .aria-message-panel {
-    left: calc(50% + min(22vw, 130px));
-    width: min(40vw, 380px);
-    max-height: min(40vh, 350px);
-    transform: translateY(-50%);
-  }
-}
-
-@media (max-width: 768px) {
-  .aria-message-panel {
-    left: 50%;
-    width: min(86vw, 520px);
-    max-height: min(30vh, 260px);
-    transform: translate(-50%, -50%);
-  }
-
-  .aria-message-text {
-    font-size: clamp(0.9rem, 4vw, 1.35rem);
-  }
-
-  .aria-song-frame {
-    display: block;
-    top: auto;
-    bottom: 0.85rem;
-    width: min(82vw, 340px);
-    height: 72px;
-  }
-}
-
-@media (max-width: 900px) {
-  .aria-success-notice {
-    top: calc(50% - 235px);
-    width: min(86vw, 420px);
-    font-size: clamp(0.95rem, 4vw, 1.35rem);
-  }
-}
-
 @media (max-width: 600px) {
   .viewer {
     padding: 0;
   }
-
   .viewer .enlarge {
     width: min(44vw, 250px) !important;
     height: min(62vw, 350px) !important;
-  }
-
-  .aria-success-notice {
-    top: 18%;
-    width: min(88vw, 340px);
-    font-size: clamp(0.9rem, 4.5vw, 1.15rem);
-  }
-
-  .aria-message-panel {
-    top: calc(50% + clamp(140px, 28vw, 160px));
-    left: 50%;
-    width: min(90vw, 390px);
-    max-height: min(25dvh, 200px);
-    transform: translate(-50%, 0);
-  }
-
-  .aria-message-text,
-  .aria-message-panel--long .aria-message-text,
-  .aria-message-panel--extra-long .aria-message-text {
-    font-size: clamp(0.8rem, 3.8vw, 1rem);
-    line-height: 1.25;
-    text-align: justify;
-  }
-
-  .aria-song-frame,
-  .aria-song-frame--youtube {
-    top: auto;
-    bottom: 0.85rem;
-    width: min(88vw, 340px);
-    height: 4rem;
-  }
-}
-
-@media (max-height: 720px) {
-  .aria-message-panel {
-    max-height: min(30vh, 200px);
-  }
-
-  .aria-message-text {
-    font-size: clamp(0.85rem, 1.35vw, 1.45rem);
-  }
-
-  .aria-song-frame {
-    display: block;
-    top: auto;
-    bottom: 0.85rem;
-    height: 64px;
   }
 }
 
@@ -445,4 +227,68 @@ main.sphere-main {
 
 .edge-fade--bottom {
   bottom: 0;
+}
+
+/* Aria Message Panel Styles */
+.aria-message-panel {
+  position: absolute;
+  z-index: 25;
+  background: #120F17;
+  color: white;
+  overflow-y: auto;
+  pointer-events: auto;
+  border-radius: var(--enlarge-radius, 32px);
+  font-family: var(--button-font), serif;
+}
+
+.aria-message-text {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Desktop Layout - text panel on left, image on right */
+@media (min-width: 769px) {
+  .aria-message-panel {
+    padding: 50px;
+    min-width: 250px;
+    min-height: 350px;
+  }
+}
+
+/* Mobile/Tablet Layout - image on top, text panel below */
+@media (max-width: 768px) {
+  .aria-message-panel {
+    padding: 30px;
+    width: 100%;
+    max-width: min(44vw, 250px);
+    height: auto;
+  }
+}
+
+.aria-message-panel--long {
+  font-size: 1.1rem;
+}
+
+.aria-message-panel--extra-long {
+  font-size: 1rem;
+}
+
+.aria-success-notice {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 35;
+  background: #ffffff;
+  color: #120F17;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-family: var(--button-font), serif;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  white-space: nowrap;
 }

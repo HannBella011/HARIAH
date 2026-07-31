@@ -179,11 +179,24 @@ const ProfileModal = ({ onCancel, onDelete, userCode, onLogout }) => {
       {selectedAria && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70" onClick={() => setSelectedAria(null)} aria-hidden="true" />
-          <div className="aria-reader relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="aria-reader relative w-full max-w-4xl max-h-[85vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
             <h3 className="pr-20 text-2xl font-bold text-black" style={{ fontFamily: 'var(--button-font)' }}>Aria for {selectedAria.recipient}</h3>
             {isAdmin && <p className="mt-1 text-sm text-purple-600">From: {selectedAria.senderCode}</p>}
-            {selectedAria.imageURL || selectedAria.picture ? <img className="mt-4 max-h-[45vh] w-full rounded-xl object-contain bg-black" src={selectedAria.imageURL || selectedAria.picture} alt={`Aria for ${selectedAria.recipient}`} /> : null}
-            <p className="mt-4 whitespace-pre-wrap break-words text-gray-800">{selectedAria.message}</p>
+            
+            <div className="mt-4 flex flex-col md:flex-row gap-4">
+              {/* Text Panel - Left Side */}
+              <div className="aria-text-panel flex-1 min-w-[300px] min-h-[300px] max-h-[45vh] overflow-y-auto p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <p className="whitespace-pre-wrap break-words text-gray-800 text-justify leading-relaxed">{selectedAria.message}</p>
+              </div>
+              
+              {/* Image - Right Side */}
+              {selectedAria.imageURL || selectedAria.picture ? (
+                <div className="aria-image-container flex-1 min-w-[300px] flex items-center justify-center">
+                  <img className="max-h-[45vh] w-full rounded-xl object-contain bg-black" src={selectedAria.imageURL || selectedAria.picture} alt={`Aria for ${selectedAria.recipient}`} />
+                </div>
+              ) : null}
+            </div>
+            
             {(selectedAria.songLink || selectedAria.songURL) && <a className="mt-4 inline-block text-blue-600 underline" href={selectedAria.songLink || selectedAria.songURL} target="_blank" rel="noopener noreferrer">Play song</a>}
             <button type="button" onClick={() => setSelectedAria(null)} className="mt-6 w-full rounded-lg bg-black px-6 py-3 font-semibold text-white">Close</button>
           </div>

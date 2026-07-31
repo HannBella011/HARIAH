@@ -611,25 +611,45 @@ export default function DomeGallery({
     if (!viewer) return;
 
     const panel = viewer.querySelector('.aria-message-panel');
-    if (!panel) return;
+    const overlay = viewer.querySelector('.enlarge');
+    if (!panel || !overlay) return;
 
-    // Let CSS handle positioning, just ensure max-height is appropriate
+    const overlayRect = overlay.getBoundingClientRect();
     const viewerRect = viewer.getBoundingClientRect();
     const isMobile = window.innerWidth <= 768;
-    
+
+    // Clear any existing positioning styles
+    panel.style.position = 'absolute';
+    panel.style.marginTop = '0';
+    panel.style.transform = 'none';
+    panel.style.right = 'auto';
+
     if (isMobile) {
-      // On mobile, panel is below image - calculate available space
-      const overlay = viewer.querySelector('.enlarge');
-      if (overlay) {
-        const overlayRect = overlay.getBoundingClientRect();
-        const songFrame = viewer.querySelector('.aria-song-frame:not([style*="opacity: 0"])');
-        const songReserve = songFrame ? 88 : 16;
-        const availableHeight = viewerRect.height - overlayRect.bottom - songReserve - 32;
-        panel.style.maxHeight = `${Math.max(100, availableHeight)}px`;
-      }
+      // Mobile/Tablet: image on top, text panel below
+      const footerHeight = 100; // Approximate footer height
+      const headerHeight = 100; // Approximate header height
+      const availableHeight = window.innerHeight - headerHeight - footerHeight;
+      const maxHeight = availableHeight - overlayRect.height - 20; // 20px gap
+
+      panel.style.width = `${overlayRect.width}px`;
+      panel.style.height = 'auto';
+      panel.style.maxHeight = `${Math.max(maxHeight, 100)}px`;
+      panel.style.left = `${overlayRect.left - viewerRect.left}px`;
+      panel.style.top = `${overlayRect.bottom - viewerRect.top + 20}px`;
     } else {
-      // On desktop, use CSS max-height
-      panel.style.maxHeight = '';
+      // Desktop: text panel on left, image on right
+      const gap = 20;
+      const overlayLeft = overlayRect.left - viewerRect.left;
+      const overlayTop = overlayRect.top - viewerRect.top;
+
+      // Match panel dimensions to image dimensions
+      panel.style.width = `${overlayRect.width}px`;
+      panel.style.height = `${overlayRect.height}px`;
+      panel.style.maxHeight = `${overlayRect.height}px`;
+
+      // Position panel to the left of the image
+      panel.style.left = `${overlayLeft - overlayRect.width - gap}px`;
+      panel.style.top = `${overlayTop}px`;
     }
   }, []);
 

@@ -264,7 +264,7 @@ function App() {
 
       <div className="app-footer fixed bottom-4 left-0 right-0 text-center z-40 pointer-events-none px-4">
         <p
-          className="text-white text-xl md:text-2xl opacity-90"
+          className="text-white text-xl md:text-1xl opacity-90"
           style={{ fontFamily: 'var(--button-font)' }}
         >
           Send musical messages with pictures to the people you care about.
