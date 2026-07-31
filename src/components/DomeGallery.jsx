@@ -610,24 +610,27 @@ export default function DomeGallery({
     const viewer = viewerRef.current;
     if (!viewer) return;
 
-    const overlay = viewer.querySelector('.enlarge');
     const panel = viewer.querySelector('.aria-message-panel');
-    if (!overlay || !panel) return;
+    if (!panel) return;
 
-    const overlayRect = overlay.getBoundingClientRect();
+    // Let CSS handle positioning, just ensure max-height is appropriate
     const viewerRect = viewer.getBoundingClientRect();
-    const gap = 12;
-    const top = overlayRect.bottom - viewerRect.top + gap;
-    const songFrame = viewer.querySelector('.aria-song-frame:not([style*="opacity: 0"])');
-    const songReserve = songFrame ? 88 : 16;
-    const maxHeight = Math.max(80, viewerRect.height - top - songReserve - 16);
-
-    panel.style.top = `${top}px`;
-    panel.style.left = '50%';
-    panel.style.right = 'auto';
-    panel.style.bottom = 'auto';
-    panel.style.transform = 'translateX(-50%)';
-    panel.style.maxHeight = `${maxHeight}px`;
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+      // On mobile, panel is below image - calculate available space
+      const overlay = viewer.querySelector('.enlarge');
+      if (overlay) {
+        const overlayRect = overlay.getBoundingClientRect();
+        const songFrame = viewer.querySelector('.aria-song-frame:not([style*="opacity: 0"])');
+        const songReserve = songFrame ? 88 : 16;
+        const availableHeight = viewerRect.height - overlayRect.bottom - songReserve - 32;
+        panel.style.maxHeight = `${Math.max(100, availableHeight)}px`;
+      }
+    } else {
+      // On desktop, use CSS max-height
+      panel.style.maxHeight = '';
+    }
   }, []);
 
   const showAriaDetails = useCallback(

@@ -215,14 +215,14 @@ main.sphere-main {
 
 .aria-message-panel {
   position: absolute;
-  top: calc(50% + clamp(180px, 33vw, 210px));
-  left: 50%;
+  top: 50%;
+  left: calc(50% + min(22vw, 130px));
   right: auto;
   bottom: auto;
   z-index: 31;
-  width: min(86vw, 520px);
-  max-height: min(28vh, 260px);
-  transform: translateX(-50%);
+  width: min(40vw, 380px);
+  max-height: min(40vh, 350px);
+  transform: translateY(-50%);
   overflow-x: hidden;
   overflow-y: auto;
   pointer-events: auto;
@@ -232,6 +232,11 @@ main.sphere-main {
   scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .aria-message-panel::-webkit-scrollbar {
@@ -252,7 +257,8 @@ main.sphere-main {
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.75);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  text-align: left;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .aria-message-text::after {
@@ -322,16 +328,21 @@ main.sphere-main {
   }
 }
 
-@media (max-width: 900px) {
-  .aria-success-notice {
-    top: calc(50% - 235px);
-    width: min(86vw, 420px);
-    font-size: clamp(0.95rem, 4vw, 1.35rem);
-  }
-
+@media (min-width: 769px) {
   .aria-message-panel {
+    left: calc(50% + min(22vw, 130px));
+    width: min(40vw, 380px);
+    max-height: min(40vh, 350px);
+    transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .aria-message-panel {
+    left: 50%;
     width: min(86vw, 520px);
-    max-height: min(24vh, 220px);
+    max-height: min(30vh, 260px);
+    transform: translate(-50%, -50%);
   }
 
   .aria-message-text {
@@ -344,6 +355,14 @@ main.sphere-main {
     bottom: 0.85rem;
     width: min(82vw, 340px);
     height: 72px;
+  }
+}
+
+@media (max-width: 900px) {
+  .aria-success-notice {
+    top: calc(50% - 235px);
+    width: min(86vw, 420px);
+    font-size: clamp(0.95rem, 4vw, 1.35rem);
   }
 }
 
@@ -365,8 +384,10 @@ main.sphere-main {
 
   .aria-message-panel {
     top: calc(50% + clamp(140px, 28vw, 160px));
+    left: 50%;
     width: min(90vw, 390px);
-    max-height: min(22dvh, 180px);
+    max-height: min(25dvh, 200px);
+    transform: translate(-50%, 0);
   }
 
   .aria-message-text,
@@ -388,7 +409,7 @@ main.sphere-main {
 
 @media (max-height: 720px) {
   .aria-message-panel {
-    max-height: min(20vh, 160px);
+    max-height: min(30vh, 200px);
   }
 
   .aria-message-text {

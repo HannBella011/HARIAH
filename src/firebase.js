@@ -3,6 +3,7 @@
 // Get these from: https://console.firebase.google.com/
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, query, where, getDocs, onSnapshot, serverTimestamp, orderBy, limit, deleteDoc, doc, setDoc, getDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -16,9 +17,10 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // Make db available globally for components
 window.db = db;
 
-// Export Firestore functions
-export { db, collection, addDoc, query, where, getDocs, onSnapshot, serverTimestamp, orderBy, limit, deleteDoc, doc, setDoc, getDoc };
+// Export Firestore and Auth functions
+export { db, auth, collection, addDoc, query, where, getDocs, onSnapshot, serverTimestamp, orderBy, limit, deleteDoc, doc, setDoc, getDoc };

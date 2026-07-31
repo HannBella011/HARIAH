@@ -1,9 +1,6 @@
 /**
  * SendAriaModal Component
  * Modal form for sending an Aria (musical message) to someone
-/**
- * SendAriaModal Component
- * Modal form for sending an Aria (musical message) to someone
  * Includes recipient name, personal message, song link, and picture upload
  */
 
