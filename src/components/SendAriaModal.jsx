@@ -261,7 +261,13 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
               aria-required="true"
             />
             <p className="text-xs text-black mt-1" style={{ fontFamily: 'var(--button-font)' }}>
-              Support for Spotify and YouTube links
+              Please be aware: Songs in this aria are linked through YouTube or Spotify. 
+            </p>
+            <p className="text-xs text-black mt-1" style={{ fontFamily: 'var(--button-font)' }}>
+              Depending on your account type, advertisements may appear before or during playback. 
+            </p>
+            <p className="text-xs text-black mt-1" style={{ fontFamily: 'var(--button-font)' }}>
+              Premium subscribers will enjoy uninterrupted listening.  
             </p>
           </div>
 
