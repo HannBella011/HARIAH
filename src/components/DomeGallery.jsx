@@ -606,6 +606,30 @@ export default function DomeGallery({
     return aria.songLink || aria.songURL || '';
   }, []);
 
+  const positionMessagePanel = useCallback(() => {
+    const viewer = viewerRef.current;
+    if (!viewer) return;
+
+    const overlay = viewer.querySelector('.enlarge');
+    const panel = viewer.querySelector('.aria-message-panel');
+    if (!overlay || !panel) return;
+
+    const overlayRect = overlay.getBoundingClientRect();
+    const viewerRect = viewer.getBoundingClientRect();
+    const gap = 12;
+    const top = overlayRect.bottom - viewerRect.top + gap;
+    const songFrame = viewer.querySelector('.aria-song-frame:not([style*="opacity: 0"])');
+    const songReserve = songFrame ? 88 : 16;
+    const maxHeight = Math.max(80, viewerRect.height - top - songReserve - 16);
+
+    panel.style.top = `${top}px`;
+    panel.style.left = '50%';
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+    panel.style.transform = 'translateX(-50%)';
+    panel.style.maxHeight = `${maxHeight}px`;
+  }, []);
+
   const showAriaDetails = useCallback(
     aria => {
       const viewer = viewerRef.current;
@@ -630,6 +654,7 @@ export default function DomeGallery({
       message.className = 'aria-message-text';
       panel.appendChild(message);
       viewer.appendChild(panel);
+      requestAnimationFrame(() => positionMessagePanel());
 
       let index = 0;
       const fullMessage = aria.message || '';
@@ -639,6 +664,8 @@ export default function DomeGallery({
         index += 1;
         if (index <= fullMessage.length) {
           window.setTimeout(typeNext, 45);
+        } else {
+          positionMessagePanel();
         }
       };
       window.setTimeout(typeNext, 160);
@@ -667,7 +694,7 @@ export default function DomeGallery({
         window.open(songLink, '_blank', 'noopener,noreferrer');
       }
     },
-    [getSongEmbed, getSongLink, notice]
+    [getSongEmbed, getSongLink, notice, positionMessagePanel]
   );
 
   const openItemFromElement = useCallback(
@@ -750,6 +777,7 @@ export default function DomeGallery({
         rootRef.current?.setAttribute('data-enlarging', 'true');
         if (openedAriaRef.current) {
           showAriaDetails(openedAriaRef.current);
+          requestAnimationFrame(() => positionMessagePanel());
         }
         if (onOpenComplete) {
           onOpenComplete();
@@ -789,7 +817,7 @@ export default function DomeGallery({
         overlay.addEventListener('transitionend', onFirstEnd);
       }
     },
-    [enlargeTransitionMs, items, lockScroll, onOpenComplete, openedImageHeight, openedImageWidth, segments, showAriaDetails, unlockScroll]
+    [enlargeTransitionMs, items, lockScroll, onOpenComplete, openedImageHeight, openedImageWidth, positionMessagePanel, segments, showAriaDetails, unlockScroll]
   );
 
   const onTileClick = useCallback(
@@ -837,10 +865,12 @@ export default function DomeGallery({
   }, []);
 
   useEffect(() => {
-    if (!selectedAria?.picture || !rootRef.current) return;
+    if (!selectedAria) return;
+    const imageSrc = selectedAria.picture || selectedAria.imageURL;
+    if (!imageSrc || !rootRef.current) return;
     const openSelected = () => {
       const matchingItem = Array.from(rootRef.current.querySelectorAll('.item')).find(
-        item => item.dataset.src === selectedAria.picture
+        item => item.dataset.src === imageSrc
       );
       const imageEl = matchingItem?.querySelector('.item__image');
       if (imageEl) {
@@ -850,6 +880,26 @@ export default function DomeGallery({
     const timer = window.setTimeout(openSelected, 80);
     return () => window.clearTimeout(timer);
   }, [openItemFromElement, selectedAria]);
+
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer) return undefined;
+
+    const handleReposition = () => {
+      if (viewer.querySelector('.aria-message-panel')) {
+        positionMessagePanel();
+      }
+    };
+
+    window.addEventListener('resize', handleReposition);
+    const ro = new ResizeObserver(handleReposition);
+    ro.observe(viewer);
+
+    return () => {
+      window.removeEventListener('resize', handleReposition);
+      ro.disconnect();
+    };
+  }, [positionMessagePanel]);
 
   return (
     <div

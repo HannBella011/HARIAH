@@ -9,10 +9,12 @@ import SendAriaModal from './components/SendAriaModal';
 import SearchAriaModal from './components/SearchAriaModal';
 import ProfileModal from './components/ProfileModal';
 import UserCodeModal from './components/UserCodeModal';
-import { subscribeToArias } from './lib/ariaStorage';
+import { subscribeToArias, syncPendingArias } from './lib/ariaStorage';
 
 const normalizeAria = ariaData => ({
   ...ariaData,
+  picture: ariaData.picture || ariaData.imageURL || null,
+  imageURL: ariaData.imageURL || ariaData.picture || null,
   senderName: ariaData.senderName || 'Anonymous',
   songLink: ariaData.songLink || ariaData.songURL || '',
   createdAt: ariaData.createdAt?.toDate ? ariaData.createdAt.toDate() : ariaData.createdAt || new Date()
@@ -178,7 +180,8 @@ function App() {
   };
 
   useEffect(() => {
-    // Real-time listener for aria updates
+    // Real-time listener for aria updates across devices
+    void syncPendingArias();
     const unsubscribe = subscribeToArias((arias) => {
       const firebaseImages = arias
         .filter(item => item.imageURL || item.picture)

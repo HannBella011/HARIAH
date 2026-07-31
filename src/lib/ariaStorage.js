@@ -13,12 +13,17 @@ const toMillis = value => {
   return Number.isNaN(date.getTime()) ? 0 : date.getTime();
 };
 const sortNewestFirst = arias => [...arias].sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
-const normalizeAria = aria => ({
-  ...aria,
-  songLink: aria.songLink || aria.songURL || '',
-  recipientKey: aria.recipientKey || toKey(aria.recipient),
-  senderCodeKey: aria.senderCodeKey || toKey(aria.senderCode)
-});
+const normalizeAria = aria => {
+  const imageURL = aria.imageURL || aria.picture || null;
+  return {
+    ...aria,
+    picture: aria.picture || imageURL,
+    imageURL,
+    songLink: aria.songLink || aria.songURL || '',
+    recipientKey: aria.recipientKey || toKey(aria.recipient),
+    senderCodeKey: aria.senderCodeKey || toKey(aria.senderCode)
+  };
+};
 
 const getLocalArias = () => {
   try {
@@ -68,6 +73,22 @@ const toFirebaseAria = aria => ({
   createdAt: serverTimestamp()
 });
 
+export const syncPendingArias = async () => {
+  const pending = getLocalArias().filter(aria => aria.pending);
+  for (const aria of pending) {
+    try {
+      const docRef = await addDoc(collection(db, ARIA_COLLECTION), toFirebaseAria(aria));
+      replaceLocalAria(aria.id, {
+        ...aria,
+        id: docRef.id,
+        pending: false
+      });
+    } catch (error) {
+      console.error('Error syncing pending aria:', error);
+    }
+  }
+};
+
 export const saveAria = async aria => {
   const localAria = saveLocalAria(aria);
   const toSave = toFirebaseAria(aria);
@@ -84,8 +105,8 @@ export const saveAria = async aria => {
     replaceLocalAria(localAria.id, persistedAria);
     return persistedAria;
   } catch (error) {
-    // The local record is intentionally retained for the sender; Firestore
-    // will be retried when the user sends again after connectivity is restored.
+    // The local record is intentionally retained for the sender; pending
+    // arias are retried when the app reconnects or on the next subscribe.
     console.error('Error saving aria to Firebase:', error);
     return localAria;
   }
@@ -151,18 +172,50 @@ export const deleteAria = async ariaId => {
 };
 
 export const subscribeToArias = (callback, maxCount = 20) => {
-  const localArias = getLocalArias();
-  try {
-    const q = query(collection(db, ARIA_COLLECTION), orderBy('createdAt', 'desc'), limit(maxCount));
-    return onSnapshot(q, snapshot => callback(mergeArias(localArias, snapshotToArias(snapshot)).slice(0, maxCount)), error => {
-      console.error('Error listening to arias:', error);
-      callback(sortNewestFirst(localArias).slice(0, maxCount));
-    });
-  } catch (error) {
-    console.error('Error setting up aria subscription:', error);
-    callback(sortNewestFirst(localArias).slice(0, maxCount));
-    return () => {};
-  }
+  let lastRemote = [];
+  let firestoreUnsubscribe = () => {};
+
+  const emit = () => {
+    callback(mergeArias(getLocalArias(), lastRemote).slice(0, maxCount));
+  };
+
+  const onStorage = event => {
+    if (event.key === LOCAL_ARIA_KEY || event.key === null) {
+      emit();
+    }
+  };
+
+  const startListener = () => {
+    try {
+      const q = query(collection(db, ARIA_COLLECTION), orderBy('createdAt', 'desc'), limit(maxCount));
+      firestoreUnsubscribe = onSnapshot(
+        q,
+        snapshot => {
+          lastRemote = snapshotToArias(snapshot);
+          emit();
+        },
+        error => {
+          console.error('Error listening to arias:', error);
+          emit();
+        }
+      );
+    } catch (error) {
+      console.error('Error setting up aria subscription:', error);
+      emit();
+    }
+  };
+
+  void syncPendingArias().finally(() => {
+    emit();
+    startListener();
+  });
+
+  window.addEventListener('storage', onStorage);
+
+  return () => {
+    firestoreUnsubscribe();
+    window.removeEventListener('storage', onStorage);
+  };
 };
 
 export const checkCodeExists = async code => {
@@ -188,4 +241,4 @@ export const getAllUserCodes = async () => {
   }
 };
 
-export default { saveAria, findAriasByRecipient, getAllAria, getAriasBySender, deleteAria, subscribeToArias, checkCodeExists, registerUserCode, getAllUserCodes };
+export default { saveAria, findAriasByRecipient, getAllAria, getAriasBySender, deleteAria, subscribeToArias, syncPendingArias, checkCodeExists, registerUserCode, getAllUserCodes };

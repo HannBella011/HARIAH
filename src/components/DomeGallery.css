@@ -215,15 +215,32 @@ main.sphere-main {
 
 .aria-message-panel {
   position: absolute;
-  top: 50%;
-  left: clamp(20px, 4vw, 76px);
-  right: calc(50% + 155px);
+  top: calc(50% + clamp(180px, 33vw, 210px));
+  left: 50%;
+  right: auto;
+  bottom: auto;
   z-index: 31;
-  max-height: min(68vh, 620px);
-  transform: translateY(-50%);
-  overflow: hidden;
-  pointer-events: none;
+  width: min(86vw, 520px);
+  max-height: min(28vh, 260px);
+  transform: translateX(-50%);
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: auto;
+  -webkit-overflow-scrolling: touch;
   text-align: left;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.aria-message-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.aria-message-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
 }
 
 .aria-message-text {
@@ -263,7 +280,8 @@ main.sphere-main {
   display: block;
   position: absolute;
   left: 50%;
-  top: calc(50% + 190px);
+  top: auto;
+  bottom: clamp(0.85rem, 3vh, 1.5rem);
   z-index: 32;
   width: min(78vw, 360px);
   height: 84px;
@@ -312,14 +330,8 @@ main.sphere-main {
   }
 
   .aria-message-panel {
-    top: auto;
-    left: 50%;
-    right: auto;
-    bottom: clamp(18px, 5vh, 56px);
     width: min(86vw, 520px);
-    max-height: 24vh;
-    transform: translateX(-50%);
-    text-align: left;
+    max-height: min(24vh, 220px);
   }
 
   .aria-message-text {
@@ -328,7 +340,8 @@ main.sphere-main {
 
   .aria-song-frame {
     display: block;
-    top: calc(50% + 180px);
+    top: auto;
+    bottom: 0.85rem;
     width: min(82vw, 340px);
     height: 72px;
   }
@@ -351,9 +364,9 @@ main.sphere-main {
   }
 
   .aria-message-panel {
-    bottom: 5.8rem;
+    top: calc(50% + clamp(140px, 28vw, 160px));
     width: min(90vw, 390px);
-    max-height: 16dvh;
+    max-height: min(22dvh, 180px);
   }
 
   .aria-message-text,
@@ -361,6 +374,7 @@ main.sphere-main {
   .aria-message-panel--extra-long .aria-message-text {
     font-size: clamp(0.8rem, 3.8vw, 1rem);
     line-height: 1.25;
+    text-align: justify;
   }
 
   .aria-song-frame,
@@ -374,7 +388,7 @@ main.sphere-main {
 
 @media (max-height: 720px) {
   .aria-message-panel {
-    max-height: 52vh;
+    max-height: min(20vh, 160px);
   }
 
   .aria-message-text {
@@ -383,7 +397,8 @@ main.sphere-main {
 
   .aria-song-frame {
     display: block;
-    top: calc(50% + 160px);
+    top: auto;
+    bottom: 0.85rem;
     height: 64px;
   }
 }
