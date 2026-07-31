@@ -48,10 +48,10 @@ const SearchAriaModal = ({ onResultFound, onCancel }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="aria-modal fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onCancel} aria-hidden="true" />
 
-      <div className="relative bg-white rounded-2xl p-6 md:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="search-modal-content relative bg-white rounded-2xl p-6 md:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
         <button
           onClick={onCancel}
           className="absolute top-4 right-4 text-black hover:text-gray-600 transition-colors"
@@ -92,7 +92,7 @@ const SearchAriaModal = ({ onResultFound, onCancel }) => {
                 className="w-full rounded-lg border border-gray-300 p-3 text-left hover:border-black hover:bg-gray-50 transition-colors"
               >
                 {aria.imageURL || aria.picture ? (
-                  <img src={aria.imageURL || aria.picture} alt={`Aria for ${aria.recipient}`} className="h-24 w-full rounded-md object-cover" />
+                  <img src={aria.imageURL || aria.picture} alt={`Aria for ${aria.recipient}`} className="search-result-image h-24 w-full rounded-md object-cover" />
                 ) : (
                   <span className="block font-semibold text-black">Aria</span>
                 )}

@@ -334,6 +334,44 @@ main.sphere-main {
   }
 }
 
+@media (max-width: 600px) {
+  .viewer {
+    padding: 0;
+  }
+
+  .viewer .enlarge {
+    width: min(44vw, 250px) !important;
+    height: min(62vw, 350px) !important;
+  }
+
+  .aria-success-notice {
+    top: 18%;
+    width: min(88vw, 340px);
+    font-size: clamp(0.9rem, 4.5vw, 1.15rem);
+  }
+
+  .aria-message-panel {
+    bottom: 5.8rem;
+    width: min(90vw, 390px);
+    max-height: 16dvh;
+  }
+
+  .aria-message-text,
+  .aria-message-panel--long .aria-message-text,
+  .aria-message-panel--extra-long .aria-message-text {
+    font-size: clamp(0.8rem, 3.8vw, 1rem);
+    line-height: 1.25;
+  }
+
+  .aria-song-frame,
+  .aria-song-frame--youtube {
+    top: auto;
+    bottom: 0.85rem;
+    width: min(88vw, 340px);
+    height: 4rem;
+  }
+}
+
 @media (max-height: 720px) {
   .aria-message-panel {
     max-height: 52vh;

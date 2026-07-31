@@ -76,7 +76,7 @@ const ProfileModal = ({ onCancel, onDelete, userCode, onLogout }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="aria-modal fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
@@ -85,7 +85,7 @@ const ProfileModal = ({ onCancel, onDelete, userCode, onLogout }) => {
       />
 
       {/* Modal Content */}
-      <div className="relative bg-white rounded-2xl p-6 md:p-8 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="profile-modal-content relative bg-white rounded-2xl p-6 md:p-8 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
 
         <h2
           className="text-3xl md:text-4xl font-bold text-black mb-6 text-center"
@@ -116,7 +116,7 @@ const ProfileModal = ({ onCancel, onDelete, userCode, onLogout }) => {
             {sentArias.map(aria => (
               <article
                 key={aria.id}
-                className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-3 bg-gray-50 rounded-xl p-4 border border-gray-200 hover:border-gray-300 transition-all"
+                className="aria-list-item grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-3 bg-gray-50 rounded-xl p-4 border border-gray-200 hover:border-gray-300 transition-all"
               >
                   <button
                     type="button"
@@ -145,7 +145,7 @@ const ProfileModal = ({ onCancel, onDelete, userCode, onLogout }) => {
                   <button
                     onClick={() => handleDelete(aria.id)}
                     disabled={deletingId === aria.id}
-                    className="self-start justify-self-end shrink-0 px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="aria-delete-button self-start justify-self-end shrink-0 px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Delete Aria"
                   >
                     {deletingId === aria.id ? 'Deleting...' : 'Delete'}
@@ -179,7 +179,7 @@ const ProfileModal = ({ onCancel, onDelete, userCode, onLogout }) => {
       {selectedAria && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70" onClick={() => setSelectedAria(null)} aria-hidden="true" />
-          <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="aria-reader relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
             <h3 className="pr-20 text-2xl font-bold text-black" style={{ fontFamily: 'var(--button-font)' }}>Aria for {selectedAria.recipient}</h3>
             {isAdmin && <p className="mt-1 text-sm text-purple-600">From: {selectedAria.senderCode}</p>}
             {selectedAria.imageURL || selectedAria.picture ? <img className="mt-4 max-h-[45vh] w-full rounded-xl object-contain bg-black" src={selectedAria.imageURL || selectedAria.picture} alt={`Aria for ${selectedAria.recipient}`} /> : null}

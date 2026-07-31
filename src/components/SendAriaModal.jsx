@@ -161,7 +161,7 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="aria-modal fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop - dimmed */}
       <div 
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
@@ -170,7 +170,7 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
       />
 
       {/* Modal Content */}
-      <div className="relative bg-white rounded-2xl p-6 md:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="send-modal-content relative bg-white rounded-2xl p-6 md:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Close Button */}
         <button
           onClick={onCancel}
@@ -310,7 +310,7 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
                 <img 
                   src={previewUrl} 
                   alt="Preview" 
-                  className="h-[350px] w-[250px] max-w-full rounded-[30px] border border-black object-cover shadow-lg"
+                  className="aria-upload-preview h-[350px] w-[250px] max-w-full rounded-[30px] border border-black object-cover shadow-lg"
                 />
               </div>
             )}
@@ -320,7 +320,7 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
             <div>
               <p className="mb-2 text-sm font-medium text-black" style={{ fontFamily: 'var(--button-font)' }}>Song Preview</p>
               <iframe
-                className="h-20 w-full rounded-lg border-0"
+                className="aria-song-preview h-20 w-full rounded-lg border-0"
                 src={songPreview.url}
                 title={songPreview.title}
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"

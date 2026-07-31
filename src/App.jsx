@@ -213,7 +213,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="fixed top-0 left-0 right-0 z-50 p-6 md:p-8 flex justify-between items-center">
+      <div className="app-header fixed top-0 left-0 right-0 z-50 p-6 md:p-8 flex justify-between items-center">
         <h1
           className="text-5xl md:text-7xl font-bold text-white transition-opacity duration-300 cursor-default"
           style={{ fontFamily: 'var(--button-font)' }}
@@ -222,7 +222,7 @@ function App() {
           Hariah
         </h1>
 
-        <div className="flex gap-3 items-center">
+        <div className="app-actions flex gap-3 items-center">
           <button
             onClick={handleProfileClick}
             className="p-3 bg-white text-black rounded-lg hover:shadow-lg hover:shadow-white/30 hover:-translate-y-0.5 focus:outline-none transition-all duration-300"
@@ -259,7 +259,7 @@ function App() {
         </div>
       </div>
 
-      <div className="fixed bottom-4 left-0 right-0 text-center z-40 pointer-events-none px-4">
+      <div className="app-footer fixed bottom-4 left-0 right-0 text-center z-40 pointer-events-none px-4">
         <p
           className="text-white text-xl md:text-2xl opacity-90"
           style={{ fontFamily: 'var(--button-font)' }}
@@ -285,7 +285,7 @@ function App() {
       </main>
 
       {statusMessage && (
-        <div className="fixed inset-0 z-[90] grid place-items-center pointer-events-none px-4 text-center text-white text-xl aria-status" style={{ fontFamily: 'var(--button-font)' }}>
+        <div className="aria-status fixed inset-0 z-[90] grid place-items-center pointer-events-none px-4 text-center text-white text-xl" style={{ fontFamily: 'var(--button-font)' }}>
           {statusMessage}
         </div>
       )}
