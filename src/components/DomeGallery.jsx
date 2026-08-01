@@ -474,22 +474,20 @@ export default function DomeGallery({
       if (!originalPos) {
         overlay.remove();
         if (refDiv) refDiv.remove();
-        const leftPanel = viewerRef.current?.querySelector('.aria-message-panel--left');
-        const rightPanel = viewerRef.current?.querySelector('.aria-message-panel--right');
+        
+        // Clean up all message panels (handles both desktop left/right and mobile single panel)
+        const allPanels = viewerRef.current?.querySelectorAll('.aria-message-panel');
+        if (allPanels) {
+          allPanels.forEach(panel => {
+            if (panel._resizeObserver) {
+              panel._resizeObserver.disconnect();
+            }
+            panel.remove();
+          });
+        }
+        
         const songFrame = viewerRef.current?.querySelector('.aria-song-frame');
         const noticePanel = viewerRef.current?.querySelector('.aria-success-notice');
-        if (leftPanel) {
-          if (leftPanel._resizeObserver) {
-            leftPanel._resizeObserver.disconnect();
-          }
-          leftPanel.remove();
-        }
-        if (rightPanel) {
-          if (rightPanel._resizeObserver) {
-            rightPanel._resizeObserver.disconnect();
-          }
-          rightPanel.remove();
-        }
         if (songFrame) songFrame.remove();
         if (noticePanel) noticePanel.remove();
         openedAriaRef.current = null;
@@ -527,22 +525,20 @@ export default function DomeGallery({
         animatingOverlay.appendChild(img);
       }
       overlay.remove();
-      const leftPanel = viewerRef.current?.querySelector('.aria-message-panel--left');
-      const rightPanel = viewerRef.current?.querySelector('.aria-message-panel--right');
+      
+      // Clean up all message panels (handles both desktop left/right and mobile single panel)
+      const allPanels = viewerRef.current?.querySelectorAll('.aria-message-panel');
+      if (allPanels) {
+        allPanels.forEach(panel => {
+          if (panel._resizeObserver) {
+            panel._resizeObserver.disconnect();
+          }
+          panel.remove();
+        });
+      }
+      
       const songFrame = viewerRef.current?.querySelector('.aria-song-frame');
       const noticePanel = viewerRef.current?.querySelector('.aria-success-notice');
-      if (leftPanel) {
-        if (leftPanel._resizeObserver) {
-          leftPanel._resizeObserver.disconnect();
-        }
-        leftPanel.remove();
-      }
-      if (rightPanel) {
-        if (rightPanel._resizeObserver) {
-          rightPanel._resizeObserver.disconnect();
-        }
-        rightPanel.remove();
-      }
       if (songFrame) songFrame.remove();
       if (noticePanel) noticePanel.remove();
       openedAriaRef.current = null;
@@ -639,6 +635,30 @@ export default function DomeGallery({
     const overlay = viewer.querySelector('.enlarge');
     if (!leftPanel || !overlay) return;
 
+    // Check if mobile/tablet mode
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+      // On mobile, panels are positioned via CSS (relative, below image)
+      // Reset any inline positioning styles
+      leftPanel.style.position = '';
+      leftPanel.style.width = '';
+      leftPanel.style.height = '';
+      leftPanel.style.maxHeight = '';
+      leftPanel.style.left = '';
+      leftPanel.style.top = '';
+
+      if (rightPanel) {
+        rightPanel.style.position = '';
+        rightPanel.style.width = '';
+        rightPanel.style.height = '';
+        rightPanel.style.maxHeight = '';
+        rightPanel.style.left = '';
+        rightPanel.style.top = '';
+      }
+      return;
+    }
+
     const overlayRect = overlay.getBoundingClientRect();
     const viewerRect = viewer.getBoundingClientRect();
 
@@ -670,8 +690,15 @@ export default function DomeGallery({
       const viewer = viewerRef.current;
       if (!viewer || !aria) return;
 
-      viewer.querySelector('.aria-message-panel--left')?.remove();
-      viewer.querySelector('.aria-message-panel--right')?.remove();
+      // Clean up all existing message panels
+      const existingPanels = viewer.querySelectorAll('.aria-message-panel');
+      existingPanels.forEach(panel => {
+        if (panel._resizeObserver) {
+          panel._resizeObserver.disconnect();
+        }
+        panel.remove();
+      });
+      
       viewer.querySelector('.aria-song-frame')?.remove();
       viewer.querySelector('.aria-success-notice')?.remove();
 
@@ -683,7 +710,73 @@ export default function DomeGallery({
         viewer.appendChild(noticeEl);
       }
 
-      // Create left panel
+      // Check if mobile/tablet mode
+      const isMobile = window.innerWidth <= 768;
+
+      if (isMobile) {
+        // On mobile, create a single scrollable panel below the image
+        const mobilePanel = document.createElement('aside');
+        mobilePanel.className = 'aria-message-panel aria-message-panel--left';
+        const mobileMessage = document.createElement('p');
+        mobileMessage.className = 'aria-message-text';
+        mobilePanel.appendChild(mobileMessage);
+        viewer.appendChild(mobilePanel);
+
+        // Add ResizeObserver
+        const overlay = viewer.querySelector('.enlarge');
+        if (overlay) {
+          const resizeObserver = new ResizeObserver(() => {
+            positionMessagePanel();
+          });
+          resizeObserver.observe(overlay);
+          mobilePanel._resizeObserver = resizeObserver;
+        }
+
+        requestAnimationFrame(() => positionMessagePanel());
+
+        // Typing effect for mobile (single panel)
+        let index = 0;
+        const fullMessage = aria.message || '';
+        const typeNext = () => {
+          if (!mobilePanel.isConnected) return;
+          mobileMessage.textContent = fullMessage.slice(0, index);
+          index += 1;
+          if (index <= fullMessage.length) {
+            window.setTimeout(typeNext, 45);
+          } else {
+            positionMessagePanel();
+          }
+        };
+        window.setTimeout(typeNext, 160);
+
+        // Handle song embed
+        const songLink = getSongLink(aria);
+        const embed = getSongEmbed(songLink);
+        if (embed) {
+          const iframe = document.createElement('iframe');
+          iframe.className = `aria-song-frame aria-song-frame--${embed.type}`;
+          iframe.src = embed.url;
+          iframe.title = 'Aria song player';
+          iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+          iframe.allowFullscreen = true;
+          iframe.style.cssText = 'position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: none;';
+          viewer.appendChild(iframe);
+
+          setTimeout(() => {
+            try {
+              iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            } catch (e) {
+              console.log('Autoplay may require user interaction');
+            }
+          }, 500);
+        } else if (songLink) {
+          window.open(songLink, '_blank', 'noopener,noreferrer');
+        }
+
+        return;
+      }
+
+      // Desktop mode: Create left panel
       const leftPanel = document.createElement('aside');
       leftPanel.className = 'aria-message-panel aria-message-panel--left';
       const leftMessage = document.createElement('p');
@@ -784,6 +877,7 @@ export default function DomeGallery({
       };
       window.setTimeout(typeNext, 160);
 
+      // Handle song embed for desktop
       const songLink = getSongLink(aria);
       const embed = getSongEmbed(songLink);
       if (embed) {

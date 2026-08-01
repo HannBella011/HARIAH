@@ -14,6 +14,22 @@ body {
   font-family: var(--subtitle-font);
 }
 
+/* Desktop footer styles - icons on left, text centered */
+.app-footer > div {
+  justify-content: center;
+  position: relative;
+}
+
+.app-footer .footer-fb {
+  position: absolute;
+  left: 0;
+}
+
+.app-footer .footer-ig {
+  position: absolute;
+  left: 2.5rem;
+}
+
 #root {
   min-height: 100vh;
 }
@@ -92,12 +108,46 @@ body {
     padding: 0 1rem;
   }
 
-  .app-footer > p:first-child {
+  .app-footer > div {
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Mobile footer styles - FB left, text center, IG right */
+  .app-footer .footer-fb {
+    position: static;
+    order: 1;
+  }
+
+  .app-footer .footer-fb svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .app-footer > div > div {
+    order: 2;
+    flex: 1;
+    text-align: center;
+  }
+
+  .app-footer .footer-ig {
+    position: static;
+    order: 3;
+  }
+
+  .app-footer .footer-ig svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .app-footer > div > div > p:first-child {
     font-size: 0.85rem;
     line-height: 1.2;
   }
 
-  .app-footer > p:last-child {
+  .app-footer > div > div > p:last-child {
     font-size: 0.65rem;
   }
 

@@ -274,8 +274,56 @@ main.sphere-main {
 
 @media (max-width: 768px) {
   /* On tablets and smaller screens (width <= 768px) */
+  .viewer {
+    flex-direction: column;   /* Stack elements vertically */
+    align-items: center;      /* Center horizontally */
+    justify-content: flex-start; /* Start from top */
+    padding: 20px;            /* Add padding */
+  }
+
+  .viewer .enlarge {
+    margin-top: 50px;         /* Move image down on mobile */
+  }
+
   .aria-message-panel {
-    padding: 30px; /* Reduce padding on smaller screens - adjust for more/less space */
+    position: relative;        /* Position relative to flow */
+    top: auto;                /* Remove absolute positioning */
+    left: auto;               /* Remove absolute positioning */
+    margin-left: 0;           /* Remove margin */
+    width: 100%;              /* Full width */
+    min-width: auto;          /* Remove minimum width */
+    height: auto;             /* Auto height */
+    min-height: auto;         /* Remove minimum height */
+    max-height: 230px;        /* Maximum height with scroll */
+    z-index: 10;              /* Keep z-index */
+    color: white;             /* Text color */
+    overflow-y: auto;         /* Enable vertical scrolling */
+    overflow-x: hidden;       /* Hide horizontal overflow */
+    pointer-events: auto;     /* Enable interaction */
+    font-family: var(--button-font), serif; /* Font family */
+    text-align: justify;      /* Justified text */
+    text-justify: inter-word; /* Word spacing */
+    padding: 4px;            /* Add padding */
+    margin-top: 30px;         /* Space above panel */
+    }
+
+  .aria-message-panel--left,
+  .aria-message-panel--right {
+    position: relative;        /* Both panels relative on mobile */
+    top: auto;
+    left: auto;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .aria-message-text {
+    overflow: visible;        /* Remove line clamping on mobile */
+    display: block;           /* Normal block display */
+    -webkit-line-clamp: unset; /* Remove line clamp */
+    line-clamp: unset;        /* Remove line clamp */
+    -webkit-box-orient: unset; /* Remove box orientation */
+    font-size: 0.9rem;          /* 🔧 MOBILE TEXT SIZE - Adjust this value (e.g., 0.9rem, 1.1rem, 1.2rem) */
+    line-height: 1.4;          /* 🔧 MOBILE LINE HEIGHT - Adjust this value (e.g., 1.3, 1.5, 1.6) */
   }
 }
 
