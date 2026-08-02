@@ -243,12 +243,17 @@ export default function DomeGallery({
 
   const items = useMemo(() => buildItems(images, segments), [images, segments]);
 
-  const applyTransform = (xDeg, yDeg) => {
+  // Create a version key that changes when images change to force re-render
+  const itemsVersion = useMemo(() => {
+    return images.map(img => img.src).join('|');
+  }, [images]);
+
+  const applyTransform = useCallback((xDeg, yDeg) => {
     const el = sphereRef.current;
     if (el) {
       el.style.transform = `translateZ(calc(var(--radius) * -1)) rotateX(${xDeg}deg) rotateY(${yDeg}deg)`;
     }
-  };
+  }, []);
 
   const lockedRadiusRef = useRef(null);
 
@@ -598,12 +603,6 @@ export default function DomeGallery({
     if (!songLink) return null;
     try {
       const url = new URL(songLink);
-      if (url.hostname.includes('spotify.com')) {
-        const parts = url.pathname.split('/').filter(Boolean);
-        const type = parts[0] || 'track';
-        const id = parts[1];
-        return id ? { url: `https://open.spotify.com/embed/${type}/${id}`, type: 'spotify' } : null;
-      }
       if (url.hostname.includes('youtube.com')) {
         const videoId = url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop();
         return videoId
@@ -1127,7 +1126,7 @@ export default function DomeGallery({
     >
       <main ref={mainRef} className="sphere-main">
         <div className="stage">
-          <div ref={sphereRef} className="sphere">
+          <div ref={sphereRef} className="sphere" key={itemsVersion}>
             {items.map((it, i) => (
               <div
                 key={`${it.x},${it.y},${i}`}

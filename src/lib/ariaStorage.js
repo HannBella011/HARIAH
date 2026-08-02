@@ -176,11 +176,14 @@ export const subscribeToArias = (callback, maxCount = 20) => {
   let firestoreUnsubscribe = () => {};
 
   const emit = () => {
-    callback(mergeArias(getLocalArias(), lastRemote).slice(0, maxCount));
+    const merged = mergeArias(getLocalArias(), lastRemote);
+    console.log('Emitting arias:', merged.length, 'total');
+    callback(merged.slice(0, maxCount));
   };
 
   const onStorage = event => {
     if (event.key === LOCAL_ARIA_KEY || event.key === null) {
+      console.log('Storage event detected, emitting arias');
       emit();
     }
   };
@@ -192,6 +195,7 @@ export const subscribeToArias = (callback, maxCount = 20) => {
         q,
         snapshot => {
           lastRemote = snapshotToArias(snapshot);
+          console.log('Firestore snapshot received:', lastRemote.length, 'arias');
           emit();
         },
         error => {
@@ -206,6 +210,7 @@ export const subscribeToArias = (callback, maxCount = 20) => {
   };
 
   void syncPendingArias().finally(() => {
+    console.log('Pending arias synced, starting listener');
     emit();
     startListener();
   });

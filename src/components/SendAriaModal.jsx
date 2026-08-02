@@ -24,10 +24,6 @@ const getSongEmbed = songLink => {
   if (!songLink) return null;
   try {
     const url = new URL(songLink);
-    if (url.hostname.includes('spotify.com')) {
-      const [type, id] = url.pathname.split('/').filter(Boolean);
-      return id ? { url: `https://open.spotify.com/embed/${type || 'track'}/${id}`, title: 'Spotify preview' } : null;
-    }
     if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
       const id = url.hostname.includes('youtu.be')
         ? url.pathname.split('/').filter(Boolean)[0]
@@ -104,6 +100,10 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
       setError('Please enter a song link');
       return;
     }
+    if (!formData.picture) {
+      setError('Please upload a picture');
+      return;
+    }
 
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -168,17 +168,6 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
 
       {/* Modal Content */}
       <div className="send-modal-content relative bg-white rounded-2xl p-6 md:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Close Button */}
-        <button
-          onClick={onCancel}
-          className="absolute top-4 right-4 text-black hover:text-white transition-colors"
-          aria-label="Close modal"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
         <h2 className="text-3xl md:text-4xl font-bold text-black mb-6 text-center" style={{ fontFamily: 'var(--button-font)' }}>
           Send an Aria
         </h2>
@@ -255,14 +244,14 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
               name="songLink"
               value={formData.songLink}
               onChange={handleChange}
-              placeholder="Paste Spotify or YouTube link"
+              placeholder="Paste YouTube link"
               className="w-full px-4 py-3 bg-white border border-black rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
               style={{ fontFamily: 'var(--button-font)' }}
               required
               aria-required="true"
             />
             <p className="text-xs text-black mt-1" style={{ fontFamily: 'var(--button-font)' }}>
-              Please be aware: Songs in this aria are linked through YouTube or Spotify. 
+              Please be aware: Songs in this aria are linked through YouTube. 
             </p>
             <p className="text-xs text-black mt-1" style={{ fontFamily: 'var(--button-font)' }}>
               Depending on your account type, advertisements may appear before or during playback. 
@@ -301,7 +290,7 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
               className="block text-sm font-medium text-black mb-2"
               style={{ fontFamily: 'var(--button-font)' }}
             >
-              Picture (Optional)
+              Picture
             </label>
             <input
               type="file"
@@ -311,6 +300,8 @@ const SendAriaModal = ({ onSubmit, onCancel, userCode }) => {
               onChange={handlePictureChange}
               className="w-full px-4 py-3 bg-white border border-black rounded-lg text-black file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-black file:text-white file:cursor-pointer hover:file:bg-white hover:file:text-black transition-all"
               aria-label="Upload a picture"
+              required
+              aria-required="true"
             />
             {previewUrl && (
               <div className="mt-4 flex justify-center">

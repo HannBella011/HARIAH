@@ -1,0 +1,37 @@
+type User @table {
+  username: String!
+  email: String!
+  createdAt: Timestamp!
+  avatarUrl: String
+  bio: String
+}
+
+type Message @table {
+  sender: User!
+  recipient: User!
+  imageUrl: String!
+  audioTrackUrl: String!
+  createdAt: Timestamp!
+  caption: String
+  themeColor: String
+}
+
+type MusicLibrary @table {
+  title: String!
+  artist: String!
+  trackUrl: String!
+  albumArtUrl: String
+  genre: String
+}
+
+type Reaction @table {
+  message: Message!
+  user: User!
+  emoji: String!
+}
+
+type Friendship @table {
+  follower: User!
+  followee: User!
+  status: String!
+}

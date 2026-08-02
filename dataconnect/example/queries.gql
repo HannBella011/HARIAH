@@ -1,0 +1,122 @@
+mutation CreateUser @auth(level: USER) {
+  user_insert(data: {id_expr: "auth.uid", email: "user@example.com", username: "newuser", createdAt_expr: "request.time"})
+}
+
+mutation UpdateUser @auth(level: USER) {
+  user_update(key: {id_expr: "auth.uid"}, data: {bio: "Updated bio"})
+}
+
+mutation DeleteUser @auth(level: USER) {
+  user_delete(key: {id_expr: "auth.uid"})
+}
+
+query GetUser @auth(level: USER) {
+  user(key: {id_expr: "auth.uid"}) {
+    username
+    email
+  }
+}
+
+query ListUsers @auth(level: PUBLIC, insecureReason: "Publicly accessible user profiles") {
+  users {
+    username
+  }
+}
+
+mutation SendMessage @auth(level: USER) {
+  message_insert(data: {senderId_expr: "auth.uid", recipientId: "550e8400-e29b-41d4-a716-446655440000", imageUrl: "url", audioTrackUrl: "url", createdAt_expr: "request.time"})
+}
+
+mutation UpdateMessage @auth(level: USER) {
+  message_update(key: {id: "550e8400-e29b-41d4-a716-446655440000"}, data: {caption: "Updated caption"})
+}
+
+mutation DeleteMessage @auth(level: USER) {
+  message_delete(key: {id: "550e8400-e29b-41d4-a716-446655440000"})
+}
+
+query GetMessage @auth(level: USER) {
+  message(id: "550e8400-e29b-41d4-a716-446655440000") {
+    caption
+  }
+}
+
+query ListMessages @auth(level: USER) {
+  messages(where: {senderId: {eq_expr: "auth.uid"}}) {
+    caption
+  }
+}
+
+mutation AddTrack @auth(level: USER) {
+  musicLibrary_insert(data: {title: "Song", artist: "Artist", trackUrl: "url"})
+}
+
+mutation UpdateTrack @auth(level: USER) {
+  musicLibrary_update(key: {id: "550e8400-e29b-41d4-a716-446655440000"}, data: {genre: "Jazz"})
+}
+
+mutation DeleteTrack @auth(level: USER) {
+  musicLibrary_delete(key: {id: "550e8400-e29b-41d4-a716-446655440000"})
+}
+
+query GetTrack @auth(level: PUBLIC, insecureReason: "Public music library access") {
+  musicLibrary(id: "550e8400-e29b-41d4-a716-446655440000") {
+    title
+  }
+}
+
+query ListTracks @auth(level: PUBLIC, insecureReason: "Public music library access") {
+  musicLibraries {
+    title
+  }
+}
+
+mutation AddReaction @auth(level: USER) {
+  reaction_insert(data: {messageId: "550e8400-e29b-41d4-a716-446655440000", userId_expr: "auth.uid", emoji: "👍"})
+}
+
+mutation UpdateReaction @auth(level: USER) {
+  reaction_update(key: {id: "550e8400-e29b-41d4-a716-446655440000"}, data: {emoji: "❤️"})
+}
+
+mutation DeleteReaction @auth(level: USER) {
+  reaction_delete(key: {id: "550e8400-e29b-41d4-a716-446655440000"})
+}
+
+query GetReaction @auth(level: USER) {
+  reaction(id: "550e8400-e29b-41d4-a716-446655440000") {
+    emoji
+  }
+}
+
+query ListReactions @auth(level: USER) {
+  reactions(where: {userId: {eq_expr: "auth.uid"}}) {
+    emoji
+  }
+}
+
+mutation FollowUser @auth(level: USER) {
+  friendship_insert(data: {followerId_expr: "auth.uid", followeeId: "550e8400-e29b-41d4-a716-446655440000", status: "active"})
+}
+
+mutation UpdateFriendship @auth(level: USER) {
+  friendship_update(key: {id: "550e8400-e29b-41d4-a716-446655440000"}, data: {status: "blocked"})
+}
+
+mutation DeleteFriendship @auth(level: USER) {
+  friendship_delete(key: {id: "550e8400-e29b-41d4-a716-446655440000"})
+}
+
+query GetFriendship @auth(level: USER) {
+  friendship(id: "550e8400-e29b-41d4-a716-446655440000") {
+    status
+  }
+}
+
+query ListFollowers @auth(level: USER) {
+  friendships(where: {followeeId: {eq_expr: "auth.uid"}}) {
+    follower {
+      username
+    }
+  }
+}

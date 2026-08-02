@@ -1,0 +1,24 @@
+mutation SeedDatabase @transaction {
+  user_insertMany(data: [
+    { id: "00000000-0000-0000-0000-000000000001", username: "alice_dev", email: "alice@example.com", createdAt: "2023-01-01T10:00:00Z" },
+    { id: "00000000-0000-0000-0000-000000000002", username: "bob_coder", email: "bob@example.com", createdAt: "2023-01-02T11:00:00Z" },
+    { id: "00000000-0000-0000-0000-000000000003", username: "charlie_ux", email: "charlie@example.com", createdAt: "2023-01-03T12:00:00Z" }
+  ])
+  message_insertMany(data: [
+    { id: "10000000-0000-0000-0000-000000000001", senderId: "00000000-0000-0000-0000-000000000001", recipientId: "00000000-0000-0000-0000-000000000002", imageUrl: "https://example.com/img1.jpg", audioTrackUrl: "https://example.com/audio1.mp3", createdAt: "2023-02-01T09:00:00Z", caption: "Hello Bob" },
+    { id: "10000000-0000-0000-0000-000000000002", senderId: "00000000-0000-0000-0000-000000000002", recipientId: "00000000-0000-0000-0000-000000000001", imageUrl: "https://example.com/img2.jpg", audioTrackUrl: "https://example.com/audio2.mp3", createdAt: "2023-02-01T10:00:00Z", caption: "Hi Alice" }
+  ])
+  musicLibrary_insertMany(data: [
+    { id: "20000000-0000-0000-0000-000000000001", title: "Lo-Fi Beats", artist: "Chill Master", trackUrl: "https://music.com/track1.mp3", genre: "Lo-Fi" },
+    { id: "20000000-0000-0000-0000-000000000002", title: "Synthwave Dreams", artist: "Neon Rider", trackUrl: "https://music.com/track2.mp3", genre: "Synthwave" },
+    { id: "20000000-0000-0000-0000-000000000003", title: "Heavy Metal", artist: "Thunder", trackUrl: "https://music.com/track3.mp3", genre: "Metal" }
+  ])
+  reaction_insertMany(data: [
+    { id: "30000000-0000-0000-0000-000000000001", messageId: "10000000-0000-0000-0000-000000000001", userId: "00000000-0000-0000-0000-000000000002", emoji: "🔥" },
+    { id: "30000000-0000-0000-0000-000000000002", messageId: "10000000-0000-0000-0000-000000000002", userId: "00000000-0000-0000-0000-000000000001", emoji: "👍" }
+  ])
+  friendship_insertMany(data: [
+    { id: "40000000-0000-0000-0000-000000000001", followerId: "00000000-0000-0000-0000-000000000001", followeeId: "00000000-0000-0000-0000-000000000002", status: "accepted" },
+    { id: "40000000-0000-0000-0000-000000000002", followerId: "00000000-0000-0000-0000-000000000002", followeeId: "00000000-0000-0000-0000-000000000003", status: "pending" }
+  ])
+}

@@ -11,7 +11,8 @@ service cloud.firestore {
         && request.resource.data.songLink is string
         && request.resource.data.senderCode is string
         && request.resource.data.recipientKey is string
-        && request.resource.data.senderCodeKey is string;
+        && request.resource.data.senderCodeKey is string
+        && (request.resource.data.imageURL == null || request.resource.data.imageURL is string);
       allow delete: if true;
     }
 
